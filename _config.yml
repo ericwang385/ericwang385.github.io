@@ -1,17 +1,18 @@
 # Site settings
-title: 一只蠢鸭子的博客
+title: Your Blog
 SEOTitle: 你的博客 | Your Blog
 header-img: img/home-bg.jpg
-email: eric.w385@gmail.com
+email: huxpro@gmail.com
 description: ""
 keyword: ""
-url: "http://psyduck.wang"              # your host, for absolute URL
-baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
+url: "http://huangxuan.me"              # your host, for absolute URL
+baseurl: "/huxblog-boilerplate"         # for example, '/blog' if your blog hosted on 'host/blog'
 
 
 
 # SNS settings
 RSS: false
+weibo_username:     huxpro
 zhihu_username:     huxpro
 github_username:    huxpro
 #twitter_username:  huxpro
@@ -49,7 +50,7 @@ kramdown:
 #disqus_username: _your_disqus_short_name_
 
 # Duoshuo settings
-duoshuo_username: psyduck
+duoshuo_username: huxblog
 # Share component is depend on Comment so we can NOT use share only.
 duoshuo_share: true                     # set to false if you want to use Comment without Sharing
 
@@ -61,7 +62,7 @@ duoshuo_share: true                     # set to false if you want to use Commen
 ba_track_id: 4cc1f2d8f3067386cc5cdb626a202900
 # Google Analytics
 ga_track_id: 'UA-49627206-1'            # Format: UA-xxxxxx-xx
-ga_domain: psyduck.wang
+ga_domain: huangxuan.me
 
 
 
