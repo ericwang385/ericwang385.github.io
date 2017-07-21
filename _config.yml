@@ -6,7 +6,7 @@ email: eric.w385@gmail.com
 description: ""
 keyword: ""
 url: "http://psyduck.wang"              # your host, for absolute URL
-baseurl: "/psyduck.wang"         # for example, '/blog' if your blog hosted on 'host/blog'
+baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
 
 
 
