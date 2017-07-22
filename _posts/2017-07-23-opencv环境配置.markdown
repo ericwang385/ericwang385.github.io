@@ -117,9 +117,10 @@ int main( int argc, char** argv )
 }
 ```
 
-## OpenCV Python的安装及环境配置 
+## Mac下OpenCV Python的安装及环境配置 
 
 如果你是一个用Python做OpenCV的开发者，那么当我前面都在放屁=。=正文从这里开始
+
 
 首先默认你已成功安装Python3.5或以上版本以及相应的pip且已安装Xcode(如果没有还不快去装 超凶.jpg)
 
