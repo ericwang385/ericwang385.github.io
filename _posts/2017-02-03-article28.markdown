@@ -1,0 +1,306 @@
+---
+layout:     post
+title:      "使用 LaTeX 编辑数学公式"
+subtitle:   "优雅地展示数学公式"
+date:       2017-02-03 12:00:00
+author:     "Xiaosheng"
+header-img: "img/bg/bg_article_28.jpg"
+catalog: true
+tags:
+    - LaTeX
+---
+
+## 前言
+
+在网页或者书本上，我们经常会看到很多排版优美的数学公式。可是目前已有的公式编辑器，要么使用方法复杂，要么功能过于简陋，总是很难满足我们的需求。于是当我们需要插入公式时，往往直接通过截图这种简单粗暴的方法来解决。
+
+[LaTeX](http://www.latex-project.org/) 是一个非常强大的排版工具，通过各种 package 资源几乎能构造出你需要的任何效果，编辑数学公式更不在话下。本文将介绍如何使用 LaTeX 来编辑数学公式，只会使用到 LaTeX 最基础的语法，即使你从未接触过 LaTeX 也可以轻松上手。
+
+通过本文，你将知道：
+
+- 数学符号的表示和数学公式的构造
+- 数学公式的排版
+- 使用 MathJax 引擎在网页上显示公式
+
+### 基础知识
+
+LaTeX 的数学模式有两种：行内模式(inline)和行间模式(display)。前者在正文的行文中，插入数学公式；后者独立排列单独成行，并自动居中。在行文中，使用 `$ ... $` 可以插入行内公式，使用 `$$ ... $$` 可以插入行间公式。
+
+> 行内公式也可以使用 `\(...\)` 或者 `\begin{math} ... \end{math}` 来插入。  
+> 行间公式也可以使用`\[ ... \] ` 或者 `\begin{displaymath} ... \end{displaymath}` 来插入。
+
+LaTeX 中最常用的特殊符号是 `{}` 和 `\`，`{}` 会把包含在中间的元素看成一个整体，\\ 后面则接一些字母用来表示符号。
+
+例如 `\alpha` 表示罗马符号 $\alpha$，`\in` 表示集合属于符号 $\in$。
+
+还有一些数学结构需要结合使用 `{}` 和 `\`，例如 `\frac{a-1}{2}` 表示 $\frac{a-1}{2}$，`\sqrt{a+b}` 表示 $\sqrt{a+b}$。
+
+上标 `^` 和下标 `_` 也是使用非常频繁的两个符号，例如 `a^3` 表示 $a^3$，`a_1` 表示 $a_1$。也可以和其他符号结合使用，例如 `\sum_{i=1}^{10}` 表示 $\sum_{i=1}^{10}$。
+
+## 1. 基本数学符号
+
+### 1.1 强调模式
+
+强调模式是指在基础符号上加一些修饰符，常用的模式有：
+
+
+| $\hat{a}$　\hat{a} | $\acute{a}$　\acute{a} | $\bar{a}$　\bar{a} | $\dot{a}$　\dot{a} | $\breve{a}$　\breve{a} |
+| $\check{a}$　\check{a} | $\grave{a}$　\grave{a} | $\vec{a}$　\vec{a} | $\ddot{a}$　\ddot{a} | $\tilde{a}$　\tilde{a} |
+
+除此以外，加粗斜体等也是常用的字体效果：
+
+| $\textbf{abc}$　\textbf{abc} | $\textit{abc}$　\textit{abc} | $\underline{abc}$　\underline{abc} | $\overline{abc}$　\overline{abc} |
+| $\mathbf{x}$　\mathbf{x} | $\boldsymbol{x}$　\boldsymbol{x} | $\mathbb{R}$　\mathbb{R} |
+
+### 1.2 希腊字母
+
+| $\alpha$　\alpha | $\beta$　\beta | $\gamma$　\gamma | $\delta$　\delta | $\epsilon$　\epsilon |
+| $\varepsilon$　\varepsilon | $\zeta$　\zeta | $\eta$　\eta | $\theta$　\theta | $\vartheta$　\vartheta |
+| $\iota$　\iota | $\kappa$　\kappa | $\lambda$　\lambda | $\mu$　\mu | $\nu$　\nu |
+| $\xi$　\xi | $o$　o | $\pi$　\pi | $\varpi$　\varpi | $\rho$　\rho |
+| $\varrho$　\varrho | $\sigma$　\sigma | $\varsigma$　\varsigma | $\tau$　\tau | $\upsilon$　\upsilon |
+| $\phi$　\phi | $\varphi$　\varphi | $\chi$　\chi | $\psi$　\psi | $\omega$　\omega |
+| $\Gamma$　\Gamma | $\Delta$　\Delta | $\Theta$　\Theta | $\Lambda$　\Lambda	 | $\Xi$　\Xi |
+| $\Pi$　\Pi | $\Sigma$　\Sigma | $\Upsilon$　\Upsilon | $\Phi$　\Phi | $\Psi$　\Psi |
+| $\Omega$　\Omega |
+
+### 1.3 二元运算
+
+| $\pm$　\pm | $\cap$　\cap | $\diamond$　\diamond | $\oplus$　\oplus |
+| $\mp$　\mp | $\cup$　\cup | $\bigtriangleup$　\bigtriangleup | $\ominus$　\ominus |
+| $\times$　\times | $\uplus$　\uplus | $\bigtriangledown$　\bigtriangledown | $\otimes$　\otimes |
+| $\div$　\div | $\sqcap$　\sqcap | $\triangleleft$　\triangleleft | $\oslash$　\oslash |
+| $\ast$　\ast | $\sqcup$　\sqcup | $\triangleright$　\triangleright | $\odot$　\odot |
+| $\star$　\star | $\vee$　\vee | $\lhd$　\lhd | $\bigcirc$　\bigcirc |
+| $\circ$　\circ | $\wedge$　\wedge | $\rhd$　\rhd | $\dagger$　\dagger |
+| $\bullet$　\bullet | $\setminus$　\setminus | $\unlhd$　\unlhd | $\ddagger$　\ddagger |
+| $\cdot$　\cdot | $\wr$　\wr |
+
+### 1.4 关系运算
+
+| $\leq$　\leq,\le | $\geq$　\geq,\ge | $\equiv$　\equiv | $\models$　\models | $\prec$　\prec |
+| $\succ$　\succ | $\sim$　\sim | $\perp$　\perp | $\preceq$　\preceq | $\succeq$　\succeq |
+| $\simeq$　\simeq | $\mid$　\mid | $\ll$　\ll | $\gg$　\gg | $\asymp$　\asymp |
+| $\parallel$　\parallel | $\subset$　\subset | $\supset$　\supset | $\approx$　\approx | $\bowtie$　\bowtie |
+| $\subseteq$　\subseteq | $\supseteq$　\supseteq | $\cong$　\cong | $\Join$　\Join | $\sqsubset$　\sqsubset |
+| $\sqsupset$　\sqsupset | $\neq$　\neq | $\smile$　\smile | $\sqsubseteq$　\sqsubseteq | $\sqsupseteq$　\sqsupseteq |
+| $\doteq$　\doteq | $\frown$　\frown | $\in$　\in | $\ni$　\ni | $\propto$　\propto |
+| $=$　= | $\vdash$　\vdash | $\dashv$　\dashv | $<$　< | $>$　\> |
+
+### 1.5 箭头符号
+
+| $\leftarrow$　\leftarrow | $\longleftarrow$　\longleftarrow | $\uparrow$　\uparrow |
+| $\Leftarrow$　\Leftarrow | $\Longleftarrow$　\Longleftarrow | $\Uparrow$　\Uparrow |
+| $\rightarrow$　\rightarrow | $\longrightarrow$　\longrightarrow | $\downarrow$　\downarrow |
+| $\Rightarrow$　\Rightarrow | $\Longrightarrow$　\Longrightarrow | $\Downarrow$　\Downarrow |
+| $\leftrightarrow$　\leftrightarrow | $\longleftrightarrow$　\longleftrightarrow | $\updownarrow$　\updownarrow |
+| $\Leftrightarrow$　\Leftrightarrow | $\Longleftrightarrow$　\Longleftrightarrow | $\Updownarrow$　\Updownarrow |
+| $\mapsto$　\mapsto | $\longmapsto$　\longmapsto | $\nearrow$　\nearrow |
+| $\hookleftarrow$　\hookleftarrow | $\hookrightarrow$　\hookrightarrow | $\searrow$　\searrow |
+| $\leftharpoonup$　\leftharpoonup | $\rightharpoonup$　\rightharpoonup | $\swarrow$　\swarrow |
+| $\leftharpoondown$　\leftharpoondown | $\rightharpoondown$　\rightharpoondown | $\nwarrow$　\nwarrow |
+
+### 1.6 杂类符号
+
+| $\ldots$　\ldots | $\cdots$　\cdots | $\vdots$　\vdots | $\ddots$　\ddots | $\aleph$　\aleph |
+| $\prime$　\prime | $\forall$　\forall | $\infty$　\infty | $\hbar$　\hbar | $\varnothing$　\varnothing |
+| $\exists$　\exists | $\nabla$　nabla | $\surd$　\surd | $\Box$　\Box | $\triangle$　\triangle |
+| $\Diamond$　\Diamond | $\imath$　\imath | $\jmath$　\jmath | $\ell$　\ell | $\neg$　\neg |
+| $\top$　\top | $\flat$　\flat | $\natural$　\natural | $\sharp$　\sharp | $\wp$　\wp |
+| $\bot$　\bot | $\clubsuit$　\clubsuit | $\diamondsuit$　\diamondsuit | $\heartsuit$　\heartsuit | $\spadesuit$　\spadesuit |
+| $\mho$　\mho | $\Re$　\Re | $\Im$　\Im | $\angle$　\angle | $\partial$　\partial |
+
+### 1.7 特殊符号
+
+| $\sum$　\sum | $\prod$　\prod | $\coprod$　\coprod | $\int$　\int | $\oint$　\oint |
+| $\bigcap$　\bigcap | $\bigcup$　\bigcup | $\bigsqcup$　\bigsqcup | $\bigvee$　\bigvee	 | $\bigwedge$　\bigwedge |
+| $\bigodot$　\bigodot | $\bigotimes$　\bigotimes | $\bigoplus$　\bigoplus | $\biguplus$　\biguplus |
+
+### 1.8 曲线函数符号
+
+| $\arccos$　\arccos | $\cos$　\cos | $\csc$　\csc | $\exp$　\exp |
+| $\ker$　\ker | $\limsup$　\limsup | $\min$　\min | $\sinh$　\sinh |
+| $\arcsin$　\arcsin | $\cosh$　\cosh | $\deg$　\deg | $\gcd$　\gcd |
+| $\lg$　\lg | $\ln$　\ln | $\Pr$　\Pr | $\sup$　\sup |
+| $\arctan$　\arctan | $\cot$　\cot | $\det$　\det | $\hom$　\hom |
+| $\lim$　\lim | $\log$　\log | $\sec$　\sec | $\tan$　\tan |
+| $\arg$　\arg | $\coth$　\coth | $\dim$　\dim | $\inf$　\inf |
+| $\liminf$　\liminf | $\max$　\max | $\sin$　\sin | $\tanh$　\tanh |
+
+### 1.9 分隔符号
+
+| $\uparrow$　\uparrow | $\Uparrow$　\Uparrow | $\downarrow$　\downarrow | $\Downarrow$　\Downarrow |
+| $\updownarrow$　\updownarrow | $\Updownarrow$　\Updownarrow | $\lfloor$　\lfloor | $\rfloor$　\rfloor |
+| $\lceil$　\lceil | $\rceil$　\rceil | $\langle$　\langle | $\rangle$　\rangle |
+| $/$　/ | $\backslash$　\backslash | $\|$　\| | $\\\|$　\\\| |
+| $\rmoustache$　\rmoustache | $\lmoustache$　\lmoustache | $\rgroup$　\rgroup | $\lgroup$　\lgroup |
+| $\arrowvert$　\arrowvert | $\Arrowvert$　\Arrowvert | $\bracevert$　\bracevert | $\mid$　\mid |
+
+你还可以使用 `\big`、`\Big`、`\bigg`、`\Bigg` 等一系列命令放在上述这些分隔符前面调整大小。例如：
+
+```
+\Bigg(\bigg(\Big(\big((x)\big)\Big)\bigg)\Bigg)
+\Bigg[\bigg[\Big[\big[[x]\big]\Big]\bigg]\Bigg]
+\Bigg\{\bigg\{\Big\{\big\{\{x\}\big\}\Big\}\bigg\}\Bigg\}
+```
+
+$$\Bigg(\bigg(\Big(\big((x)\big)\Big)\bigg)\Bigg)\quad\quad\Bigg[\bigg[\Big[\big[[x]\big]\Big]\bigg]\Bigg]\quad\quad\Bigg\{\bigg\{\Big\{\big\{\{x\}\big\}\Big\}\bigg\}\Bigg\}$$
+
+## 2. 数学公式的构造 
+
+数学公式一般包含一定的数学结构，例如分号、开根号等等，LaTeX 也提供了相应的符号：
+
+| $\widetilde{abc}$&ensp;\widetilde{abc} | $\widehat{abc}$&ensp;\widehat{abc} | $\overleftarrow{abc}$&ensp;\overleftarrow{abc} | $\overrightarrow{abc}$&ensp;\overrightarrow{abc} |
+| $\overline{abc}$&ensp;\overline{abc} | $\underline{abc}$&ensp;\underline{abc} | $\overbrace{abc}$&ensp;\overbrace{abc} | $\underbrace{abc}$&ensp;\underbrace{abc} |
+| $\sqrt{abc}$&ensp;\sqrt{abc} | $\sqrt[n]{abc}$&ensp;\sqrt[n]{abc} | $f’$&ensp;f’ | $\frac{abc}{xyz}$&ensp;\frac{abc}{xyz} |
+| $\dbinom{n}{r}$&ensp;\dbinom{n}{r} |
+
+下面我们使用上面的结构，构造一些简单的数学公式
+
+```
+x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}
+```
+
+$$
+x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}
+$$
+
+```
+\dbinom{n}{r}=\binom{n}{n-r}=C^n_r=C^n_{n-r}
+```
+
+$$
+\dbinom{n}{r}=\binom{n}{n-r}=C^n_r=C^n_{n-r}
+$$
+
+```
+\begin{matrix} \int_{-N}^{N} e^x\, dx\end{matrix}
+```
+
+$$
+\begin{matrix} \int_{-N}^{N} e^x\, dx\end{matrix}
+$$
+
+```
+y_{MAP}=\mathop{argmax}\limits_Y P(Y \mid X)
+```
+
+$$
+y_{MAP}=\mathop{argmax}\limits_Y P(Y \mid X)
+$$
+
+## 3. 数学公式的排版 
+
+### 3.1 矩阵
+
+最常见的排版就是矩阵(LaTeX 使用 `\\` 换行)：
+
+```
+\begin{matrix} x&y\\z&v \end{matrix}
+\begin{vmatrix} x&y\\z&v \end{vmatrix}
+\begin{bmatrix} x&y\\z&v \end{bmatrix}
+\begin{pmatrix} x&y\\z&v \end{pmatrix}
+```
+
+$$
+\begin{matrix}x&y\\z&v\end{matrix}\quad\quad\begin{vmatrix}x&y\\z&v\end{vmatrix}\quad\quad\begin{bmatrix}x&y\\z&v\end{bmatrix}\quad\quad\begin{pmatrix}x&y\\z&v\end{pmatrix}
+$$
+
+### 3.2 分段函数
+
+分段函数可以用 `cases` 来实现：
+
+```
+y=\begin{cases}
+-x,& x\leq 0 \\
+x,& x>0
+\end{cases}
+```
+
+$$
+y=\begin{cases}
+-x,& x\leq 0 \\
+x,& x>0
+\end{cases}
+$$
+
+### 3.3 对齐
+
+需要对齐的公式，可以使用 `align` 来实现，对齐则使用 `&` 来实现。
+
+```
+\begin{align}
+x = a&+b+c+ \\
+d&+e+f+g
+\end{align}
+```
+
+$$
+\begin{align}
+x = a&+b+c+ \\
+d&+e+f+g
+\end{align}
+$$
+
+### 3.4 公式组
+
+无需对齐的公式组可以使用 `gather` 环境，需要对齐的公式组可以使用 `align` 环境。
+
+```
+\begin{gather}
+a = b+c+d \\
+x = y+z
+\end{gather}
+```
+
+$$
+\begin{gather}
+a = b+c+d \\
+x = y+z
+\end{gather}
+$$
+
+```
+\begin{align}
+a &= b+c+d \\
+x &= y+z
+\end{align}
+```
+
+$$
+\begin{align}
+a &= b+c+d \\
+x &= y+z
+\end{align}
+$$
+
+## 4. 使用 MathJax 引擎在网页上显示公式
+
+[MathJax](https://www.mathjax.org/) 是一个 javaScript 引擎，用来在网页上显示数学公式。无论是使用 LaTeX、MathML 或者 AsciiMath 符号，这些公式都会被 javascript 处理为 HTML、SVG 或者 MathML 符号。
+
+在网页中使用 MathJax 来渲染 LaTeX 公式非常简单，只需要在网页中引入 MathJax 的 js 脚本：
+
+```html
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
+```
+
+当然，你也可以加载国内 [Bootstrap 中文网](http://www.bootcss.com/) 提供的免费 CDN 服务：[http://www.bootcdn.cn/mathjax/](http://www.bootcdn.cn/mathjax/)。
+
+上面的代码使用默认配置 `config=default` 来使用 MathJax 引擎，解析行间公式使用 `$$...$$` 或者 `\[...\]`，行内公式则是 `\(...\)`。我们也可以自定义 MathJax 引擎的配置，例如我们可以为行内公式添加解析符 `$...$`：
+
+```html
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML"></script>
+```
+
+## 参考
+
+- [一份其实很短的 LaTeX 入门文档](http://liam0205.me/2014/09/08/latex-introduction/)
+- [LaTeX数学公式的符号表示](http://blog.csdn.net/ws_20100/article/details/49159291)
+- [Markdown中插入数学公式的方法](http://blog.csdn.net/xiahouzuoxin/article/details/26478179)
+- [TeX and LaTeX input](http://docs.mathjax.org/en/latest/start.html#tex-and-latex-input)
+

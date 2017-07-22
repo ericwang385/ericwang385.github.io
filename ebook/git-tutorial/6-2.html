@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<link rel="stylesheet" type="text/css" href="stylesheets/xspost.css" media="screen">
+	<title>解决冲突 - Git 教程</title>
+</head>
+<body>
+
+	<h3>
+		<a href="index.html">Git 教程</a>
+		>
+		<a href="menu.html">目录</a>
+		>
+	</h3>
+
+	<h1>解决冲突</h1>
+
+	<p>人生不如意之事十之八九，合并分支往往也不是一帆风顺的。</p>
+
+	<p>
+		准备新的
+		<code>feature1</code>
+		分支，继续我们的新分支开发：
+	</p>
+
+	<pre><code>$ git checkout -b feature1
+Switched to a new branch 'feature1'
+</code></pre>
+
+	<p>修改 readme.txt 最后一行，改为：</p>
+
+	<pre><code>Creating a new branch is quick AND simple.</code></pre>
+
+	<p>
+		在
+		<code>feature1</code>
+		分支上提交：
+	</p>
+
+	<pre><code>$ git add readme.txt 
+$ git commit -m "AND simple"
+[feature1 75a857c] AND simple
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+
+	<p>
+		切换到
+		<code>master</code>
+		分支：
+	</p>
+
+	<pre><code>$ git checkout master
+Switched to branch 'master'
+Your branch is up-to-date with 'origin/master'.
+</code></pre>
+
+	<p>
+		Git 还会自动提示我们当前
+		<code>master</code>
+		分支与远程的
+		<code>master</code>
+		分支是同步的。
+	</p>
+
+	<p>
+		在
+		<code>master</code>
+		分支上把 readme.txt 文件的最后一行改为：
+	</p>
+
+	<pre><code>Creating a new branch is quick &amp; simple.</code></pre>
+
+	<p>提交：</p>
+
+	<pre><code>$ git add readme.txt 
+$ git commit -m "&amp; simple"
+[master 400b400] &amp; simple
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+
+	<p>
+		现在，
+		<code>master</code>
+		分支和
+		<code>feature1</code>
+		分支各自都分别有新的提交，变成了这样：
+	</p>
+
+	<p>
+		<img src="img/6-2-0.png" alt="6-2-0" />
+	</p>
+
+	<p>这种情况下，Git 无法执行“快速合并”，只能试图把各自的修改合并起来，但这种合并就可能会有冲突，我们试试看：</p>
+
+	<pre><code>$ git merge feature1
+Auto-merging readme.txt
+CONFLICT (content): Merge conflict in readme.txt
+Automatic merge failed; fix conflicts and then commit the result.
+</code></pre>
+
+	<p>
+		果然冲突了！Git 告诉我们，readme.txt 文件存在冲突，必须手动解决冲突后再提交。
+		<code>git status</code>
+		也可以告诉我们冲突的文件：
+	</p>
+
+	<pre><code>$ git status
+# On branch master
+# Your branch is ahead of 'origin/master' by 2 commits.
+#
+# Unmerged paths:
+#   (use "git add/rm &lt;file&gt;..." as appropriate to mark resolution)
+#
+#       both modified:      readme.txt
+#
+no changes added to commit (use "git add" and/or "git commit -a")
+</code></pre>
+
+	<p>我们可以直接查看 readme.txt 的内容：</p>
+
+	<pre><code>$ cat readme.txt
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+Creating a new branch is quick &amp; simple.
+=======
+Creating a new branch is quick AND simple.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature1
+</code></pre>
+
+	<p>
+		Git用
+		<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>
+		，
+		<code>=======</code>
+		，
+		<code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>
+		标记出不同分支的内容，我们修改如下后保存：
+	</p>
+
+	<pre><code>Creating a new branch is quick and simple.</code></pre>
+
+	<p>再提交：</p>
+
+	<pre><code>$ git add readme.txt 
+$ git commit -m "conflict fixed"
+[master 59bc1cb] conflict fixed
+</code></pre>
+
+	<p>
+		现在，
+		<code>master</code>
+		分支和
+		<code>feature1</code>
+		分支变成了下图所示：
+	</p>
+
+	<p>
+		<img src="img/6-2-1.png" alt="6-2-1" />
+	</p>
+
+	<p>
+		用带参数的
+		<code>git log</code>
+		也可以看到分支的合并情况：
+	</p>
+
+	<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+*   59bc1cb conflict fixed
+|\
+| * 75a857c AND simple
+* | 400b400 &amp; simple
+|/
+* fec145a branch test
+...
+</code></pre>
+
+	<p>最后，删除 feature1 分支：</p>
+
+	<pre><code>$ git branch -d feature1
+Deleted branch feature1 (was 75a857c).
+</code></pre>
+
+	<p>工作完成。</p>
+
+	<h2>小结</h2>
+
+	<p>当 Git 无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。</p>
+
+	<p>
+		用
+		<code>git log --graph</code>
+		命令可以看到分支合并图。
+	</p>
+
+	<br />
+
+	<div align="center">
+		<a href="6-1.html" class="btn-black">上一节</a>
+		<a href="menu.html" class="btn-black">返回目录</a>
+		<a href="6-3.html" class="btn-black">下一节</a>
+	</div>
+
+</body>
+</html>

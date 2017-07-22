@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <link rel="stylesheet" type="text/css" href="stylesheets/xspost.css" media="screen">
+  <title>创建标签 - Git 教程</title>
+</head>
+<body>
+
+  <h3>
+    <a href="index.html">Git 教程</a>
+    >
+    <a href="menu.html">目录</a>
+    >
+  </h3>
+
+  <h1>创建标签</h1>
+
+  <p>在 Git 中打标签非常简单，首先，切换到需要打标签的分支上：</p>
+
+  <pre><code>$ git branch
+* dev
+  master
+$ git checkout master
+Switched to branch 'master'
+</code></pre>
+
+  <p>
+    然后，敲命令
+    <code>git tag &lt;name&gt;</code>
+    就可以打一个新标签：
+  </p>
+
+  <pre><code>$ git tag v1.0</code></pre>
+
+  <p>
+    可以用命令
+    <code>git tag</code>
+    查看所有标签：
+  </p>
+
+  <pre><code>$ git tag
+v1.0
+</code></pre>
+
+  <p>
+    默认标签是打在最新提交的 commit 上的。有时候，如果忘了打标签，比如，现在已经是周五了，但应该在周一打的标签没有打，怎么办？
+  </p>
+
+  <p>方法是找到历史提交的 commit id，然后打上就可以了：</p>
+
+  <pre><code>$ git log --pretty=oneline --abbrev-commit
+6a5819e merged bug fix 101
+cc17032 fix bug 101
+7825a50 merge with no-ff
+6224937 add merge
+59bc1cb conflict fixed
+400b400 &amp; simple
+75a857c AND simple
+fec145a branch test
+d17efd8 remove test.txt
+...
+</code></pre>
+
+  <p>
+    比方说要对
+    <code>add merge</code>
+    这次提交打标签，它对应的 commit id 是
+    <code>6224937</code>
+    ，敲入命令：
+  </p>
+
+  <pre><code>$ git tag v0.9 6224937</code></pre>
+
+  <p>
+    再用命令
+    <code>git tag</code>
+    查看标签：
+  </p>
+
+  <pre><code>$ git tag
+v0.9
+v1.0
+</code></pre>
+
+  <p>
+    注意，标签不是按时间顺序列出，而是按字母排序的。可以用
+    <code>git show &lt;tagname&gt;</code>
+    查看标签信息：
+  </p>
+
+  <pre><code>$ git show v0.9
+commit 622493706ab447b6bb37e4e2a2f276a20fed2ab4
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Thu Aug 22 11:22:08 2013 +0800
+
+    add merge
+...
+</code></pre>
+
+  <p>
+    可以看到，
+    <code>v0.9</code>
+    确实打在
+    <code>add merge</code>
+    这次提交上。
+  </p>
+
+  <p>
+    还可以创建带有说明的标签，用
+    <code>-a</code>
+    指定标签名，
+    <code>-m</code>
+    指定说明文字：
+  </p>
+
+  <pre><code>$ git tag -a v0.1 -m "version 0.1 released" 3628164</code></pre>
+
+  <p>
+    用命令
+    <code>git show &lt;tagname&gt;</code>
+    可以看到说明文字：
+  </p>
+
+  <pre><code>$ git show v0.1
+tag v0.1
+Tagger: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Mon Aug 26 07:28:11 2013 +0800
+
+version 0.1 released
+
+commit 3628164fb26d48395383f8f31179f24e0882e1e0
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Tue Aug 20 15:11:49 2013 +0800
+
+    append GPL
+</code></pre>
+
+  <p>
+    还可以通过
+    <code>-s</code>
+    用私钥签名一个标签：
+  </p>
+
+  <pre><code>$ git tag -s v0.2 -m "signed version 0.2 released" fec145a</code></pre>
+
+  <p>
+    签名采用 PGP 签名，因此，必须首先安装 gpg（GnuPG），如果没有找到 gpg，或者没有 gpg 密钥对，就会报错：
+  </p>
+
+  <pre><code>gpg: signing failed: secret key not available
+error: gpg failed to sign the data
+error: unable to sign the tag
+</code></pre>
+
+  <p>如果报错，请参考 GnuPG 帮助文档配置 Key。</p>
+
+  <p>
+    用命令
+    <code>git show &lt;tagname&gt;</code>
+    可以看到 PGP 签名信息：
+  </p>
+
+  <pre><code>$ git show v0.2
+tag v0.2
+Tagger: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Mon Aug 26 07:28:33 2013 +0800
+
+signed version 0.2 released
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (Darwin)
+
+iQEcBAABAgAGBQJSGpMhAAoJEPUxHyDAhBpT4QQIAKeHfR3bo...
+-----END PGP SIGNATURE-----
+
+commit fec145accd63cdc9ed95a2f557ea0658a2a6537f
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Thu Aug 22 10:37:30 2013 +0800
+
+    branch test
+</code></pre>
+
+  <p>用 PGP 签名的标签是不可伪造的，因为可以验证 PGP 签名。验证签名的方法比较复杂，这里就不介绍了。</p>
+
+  <h2>小结</h2>
+
+  <ul>
+    <li>
+      命令
+      <code>git tag &lt;name&gt;</code>
+      用于新建一个标签，默认为
+      <code>HEAD</code>
+      ，也可以指定一个 commit id；
+    </li>
+    <li>
+      <code>git tag -a &lt;tagname&gt; -m "blablabla..."</code>
+      可以指定标签信息；
+    </li>
+    <li>
+      <code>git tag -s &lt;tagname&gt; -m "blablabla..."</code>
+      可以用PGP签名标签；
+    </li>
+    <li>
+      命令
+      <code>git tag</code>
+      可以查看所有标签。
+    </li>
+  </ul>
+
+  <br />
+
+  <div align="center">
+    <a href="7-0.html" class="btn-black">上一节</a>
+    <a href="menu.html" class="btn-black">返回目录</a>
+    <a href="7-2.html" class="btn-black">下一节</a>
+  </div>
+
+</body>
+</html>

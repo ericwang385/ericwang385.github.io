@@ -1,0 +1,230 @@
+---
+layout:     post
+title:      "神经网络（中）：多层前馈神经网络与反向传播算法"
+subtitle:   "如何学习到网络中权值"
+date:       2017-05-06 12:00:00
+author:     "Xiaosheng"
+header-img: "img/bg/bg_article_56.jpg"
+catalog:  true
+tags:
+    - 机器学习
+    - 深度学习
+---
+
+在上一篇[《神经网络（上）：神经元与感知机》](/2017/05/05/article56/)中我们提到，单个感知机只能表示线性决策面。如果要解决非线性可分问题，就需要使用多层功能神经元。
+
+### 1. 多层前馈神经网络 
+
+![1](/img/article/article_57_1.png)
+
+常见的神经网络是形如上图的层级结构，每层神经元与下一层神经元全互连，神经元之间不存在同层连接，也不存在跨层连接。这样的神经网络结构通常称为**多层前馈神经网络(multi-layer feedforward neural networks)**，其中输入层神经元接收外界输入，隐层与输出层神经元对信号进行加工，最终结果由输出层神经元输出；换言之。输入层神经元仅是接受输入，不进行函数处理，隐层与输出层包含功能神经元。
+
+> “前馈”并不意味着网络中信号不能向后传，而是指网络拓扑结构上不存在环或回路，在模型的输出和模型本身之间没有反馈(feedback)连接。当前馈神经网络被扩展成包含反馈连接时，它们被称为循环神经网络(recurrent neural network)。
+
+上面的左图通常被称为“两层网络”，或者称为“单隐层网络”。只需包含隐层，即可称为多层网络。
+
+神经网络的学习过程，就是根据训练数据来调整神经元之间的“连接权”(connection weight)以及每个功能神经元的阈值。我们通常把阈值记为 $−w_0$，并假想有一个附加的常量输入 $x_0=1$，于是权值和阈值的学习可以统一为权重的学习。
+
+#### Sigmoid 单元
+
+我们已经知道，神经元的数学模型为 $y=f(\sum_{i=1}^n w_ix_i)$，其中 $f$ 为激活函数。对于感知机，它使用阶跃函数 $\text{sgn}$ 作为激活函数，但是它的不连续阈值使它不可微，所以不适合梯度下降算法。而如果直接使用线性单元，多个线性单元的连接依然产生线性函数，而我们更希望选择能够表征非线性函数的网络。
+
+我们需要的是这样的单元，它的输出是输入的非线性函数，并且输出是输入的可微函数。Sigmoid 单元就是一种符合要求的单元，它的结构非常类似于感知机，但它基于一个平滑的可微阈值函数。Sigmoid 单元先计算它的输入的线性组合，然后应用一个 $\text{Sigmoid}$ 函数到此结果，以典型的 $\text{Logistic}$ 函数为例：
+$$
+y = \text{sigmoid}(\boldsymbol{w}\cdot\boldsymbol{x})
+$$
+
+$$
+\text{sigmoid}(y)=\frac{1}{1+e^{-y}}
+$$
+
+$\text{Sigmoid}$ 函数有一个有用的特征，就是它的导数很容易用它的输出表示，确切地讲，$$f'(x)=f(x)\cdot(1-f(x))$$。有时我们也使用其他易计算导数的可微函数代替 $\text{Sigmoid}$，例如把 $\text{Sigmoid}$ 函数定义的 $e^{-y}$ 项替换为 $e^{-k\cdot y}$，其中 $k$ 为某个正的常数，用来决定这个阈值函数的陡峭性。双曲正切函数 $\tanh$ 有时也用来代替 $\text{Sigmoid}$ 函数。
+
+### 2. 反向传播算法
+
+对于由一系列确定的单元互连形成的多层网络，反向传播算法可用来学习这个网络的权值。它采用梯度下降方法试图最小化网络输出值和目标值之间的误差平方。
+
+因为神经网络有多个输出单元，因而需要重新定义误差 $E$，以便对所有输出的误差求和：
+
+$$
+E(\boldsymbol{w})\equiv\frac{1}{2}\sum_{d\in D}\sum_{k \in \text{outputs}}(t_{kd}-o_{kd})^2
+$$
+
+其中，$\text{output}$ 是网络输出单元的集合，$t_{kd}$ 和 $o_{kd}$ 是与训练样例 $d$ 和第 $k$ 个输出单元相关的输出值。反向传播算法面临的问题是搜索一个巨大的假设空间，这个空间由网络中所有单元的所有可能的权值定义。这种情况可以用一个误差曲面来可视化表示，与下图表示的线性单元的误差曲面相似：
+
+![2](/img/article/article_57_2.png)
+
+梯度下降可被用来尝试寻找一个假设使 $E$ 最小化。在多层网络中，误差曲面可能有多个局部极小值，而梯度下降仅能保证收敛到局部极小值，而未必得到全局最小的误差。尽管有这个障碍，但在实践中很多应用反向传播算法都产生了出色的结果。
+
+#### 两层网络的反向传播算法
+
+![3](/img/article/article_57_3.png)
+
+考虑类似上图这样包含两层 sigmoid 单元的多层前馈网络，它每一层的单元都与前一层的所有单元相连。下面就是对应于这种网络的反向传播算法的随机梯度版本：
+
+训练样例是形式为 $\langle\boldsymbol{x},\boldsymbol{t}\rangle$ 的序偶，其中 $\boldsymbol{x}$ 是网络输入值向量，$\boldsymbol{t}$ 是目标输出值。$\eta$ 是学习速率。$n_{in}$ 是网络输入单元的数量，$n_{hidden}$ 是隐藏层单元数，$n_{out}$ 是输出单元数。从单元 $i$ 到单元 $j$ 的输入表示为 $x_{ij}$，单元 $i$ 到单元 $j$ 的权值表示为 $w_{ij}$。
+
+- 创建具有 $n_{in}$ 个输入单元、$n_{hidden}$ 个隐藏单元、$n_{out}$ 个输出单元的网络。
+
+- 初始化所有网络权值为小的随机值
+
+- 在遇到终止条件前：
+
+  - 对每一个训练样例 $\langle\boldsymbol{x},\boldsymbol{t}\rangle$，把输入沿网络前向传播，使误差沿网络反向传播：
+
+    1. 把实例 $\boldsymbol{x}$ 输入网络，计算网络中每个单元 $u$ 的输出 $o_u$。
+
+    2. 对于网络的每个输出单元 $k$，计算它的误差项
+
+       $$
+       \delta_k=o_k(1-o_k)(t_k-o_k)
+       $$
+       ​
+
+    3. 对于网络的每个隐藏单元 $h$，计算它的误差项 $\delta_h$
+
+       $$
+       \delta_h=o_h(1-o_h)\sum_{k \in outputs}w_{hk}\delta_k
+       $$
+       ​
+
+    4. 更新每个网络权值
+
+       $$
+       \begin{align}&w_{ij} \leftarrow w_{ij+\Delta}w_{ij}\\&\Delta w_{ij}=\eta\delta_jx_{ij}\end{align}
+       $$
+       ​
+
+
+
+> 因为训练样例仅对网络的输出提供了目标值 $t_k$，所以缺少直接的目标值来计算隐藏单元的误差值，因此采用间接办法计算隐藏单元的误差项：对受隐藏单元 $h$ 影响的每一个单元的误差 $\delta_k$ 进行加权求和，每个误差 $\delta_k$ 的权值为 $w_{hk}$，$w_{hk}$ 就是从隐藏单元 $h$ 到输出单元 $k$ 的权值。这个权值刻画了隐藏单元 $h$ 对于输出单元 $k$ 的误差应“负责”的程度。
+
+上面的“标准反向传播算法”随着每个训练样例的出现而递增地更新权值，这一点与梯度下降的随机近似算法一致。如果要取得误差 $E$ 的真实梯度，需要在修改权值前对所有训练样例的 $\delta_jx_{ij}$ 值求和，这样就得到了“累积反向传播算法”。累积反向传播算法与标准反向传播算法都很常用。
+
+#### 学习任意的无环网络
+
+上面介绍的反向传播算法的定义虽然只适用于两层网络，不过给出的算法可以简单地推广到任意深度的前馈网络。其中权值更新法则和输出单元误差计算方式均保持不变，唯一变化的是计算隐藏层节点 $\delta$ 值的过程。概括地说，第 $m$ 层的单元 $r$ 的 $\delta_r$ 值是由更深的 $m+1$ 层的 $\delta$ 值根据下式计算的：
+
+$$
+\delta_r=o_r(1-o_r)\sum_{s\in m+1 层}w_{rs}\delta_s
+$$
+
+这个公式与前面算法中的第 3 步相同，这里要说明的是对于网络中的任意数量的隐藏单元，该步骤要被重复很多遍。将这个算法推广到任何有向无环结构也同样简单，而不论网络中的单元是否像我们目前假定的那样被排列在统一的层上。对于网络单元没有按此排列的情况，计算任意内部单元（也就是所有非输出单元）的 $\delta$ 的法则是：
+
+$$
+\delta_r=o_r(1-o_r)\sum_{s\in Downstream(r)}w_{rs}\delta_s
+$$
+
+其中，$Downstream(r)$ 是在网络中单元 $r$ 的直接的下游（输入中包括 $r$ 的输出）单元的集合。
+
+#### 增加冲量项
+
+因为反向传播算法的应用如此广泛，所以已经开发出了很多反向传播算法的变体。其中最常见的是修改算法中的权值更新法则，使第 $n$ 次迭代时的权值的更新部分地依赖于发生在第 $n-1$ 次迭代时的更新，即：
+
+$$
+\Delta w_{ij}(n)=\eta\delta_jx_{ij}+\alpha\Delta w_{ij}(n-1)
+$$
+
+这里 $\Delta w_{ij}(n)$ 是算法主循环中的第 $n$ 次迭代进行的权值更新，$0\le\alpha\lt1$ 是一个称为**冲量(momentum)**的常数。为了理解这个冲量项的作用，设想梯度下降的搜索轨迹就好像一个（无冲量）球沿误差曲面滚下。$\alpha$ 的作用是增加冲量，使这个球从一次迭代到下一次迭代时以同样的方向滚动。
+
+冲量有时会使这个球滚过误差曲面的局部极小值或使其滚过误差曲面上的平坦区域。如果没有冲量，这个球有可能在这个区域停止。它也具有在梯度不变的区域逐渐增大搜索步长的效果，从而可以加快收敛。
+
+### 3. 反向传播算法的推导
+
+标准反向传播算法使用随机梯度下降法更新权值，对于每个训练样例 $d$，利用关于这个样例的误差 $E_d$ 的梯度修改权值。具体来说，对于每一个训练样例 $d$，每个权 $w_{ij}$ 被增加 $\Delta w_{ij}$：
+
+$$
+\Delta w_{ij}=-\eta \frac{\partial E_d}{\partial w_{ij}}
+$$
+
+其中，$E_d$ 是训练样例 $d$ 的误差，通过对网络中所有输出单元的求和得到：
+
+$$
+E_d(\boldsymbol{w})\equiv \frac{1}{2}\sum_{k \in outputs}(t_k-o_k)^2
+$$
+
+这里，$outputs$ 是网络中输出单元的集合，$t_k$ 是单元 $k$ 对于训练样例 $d$ 的目标值，$o_k$ 是给定训练样例 $d$ 时单元 $k$ 的输出值。
+
+随机梯度下降法的推导在概念上是很容易的，但是需要留意很多下标和变量。先定义一下在推导中使用到的符号：
+
+- $x_{ij}$ = 单元 $j$ 的第 $i$ 个输入
+- $w_{ij}$ = 与单元 $j$ 的第 $i$ 个输入相关联的权值
+- $net_j$ = $\sum_iw_{ij}x_{ij}$ 单元 $j$ 的输入的加权和
+- $o_j$ = 单元 $j$ 计算出的输出
+- $t_j$ = 单元 $j$ 的目标输出
+- $\sigma$ = sigmoid 函数
+- $outputs$ = 网络输出层的单元的集合
+- $Downstream(j)$ = 单元的直接输入中包含单元 $j$ 的输出的单元的集合
+
+注意到权值 $w_{ij}$ 仅能通过 $net_j$ 影响网络的其他部分，所以我们可以使用链式规则(chain rule)得到：
+
+$$
+\begin{align}\Delta w_{ij}&=-\eta\frac{\partial E_d}{\partial w_{ij}}=-\eta\frac{\partial E_d}{\partial net_j}\frac{\partial net_j}{\partial w_{ij}}\\&=-\eta\frac{\partial E_d}{\partial net_j}x_{ij}\end{align}
+$$
+
+接下来分两种情况考虑：一种情况，单元 $j$ 是网络的一个输出单元；另一种情况，单元 $j$ 是一个内部单元。
+
+#### 输出单元的权值训练法则
+
+就像 $w_{ij}$ 仅能通过 $net_j$ 影响网络一样，$net_j$ 仅能通过 $o_j$ 影响网络。可以再次使用链式规则得到：
+
+$$
+\frac{\partial E_d}{\partial net_j}=\frac{\partial E_d}{\partial o_j}\frac{\partial o_j}{\partial net_j}
+$$
+
+先看第一项：
+
+$$
+\frac{\partial E_d}{\partial o_j}=\frac{\partial}{\partial o_j}\frac{1}{2}\sum_{k \in outputs}(t_k-o_k)^2
+$$
+
+除了当 $k=j$ 时，所有输出单元 $k$ 的导数 $\frac{\partial}{\partial o_j}(t_k-o_k)^2$ 为 $0$。所以不必对多个输出单元求和，只需设 $k=j$。
+
+$$
+\begin{align}\frac{\partial E_d}{\partial o_j}&=\frac{\partial}{\partial o_j}\frac{1}{2}(t_j-o_j)^2\\&=\frac{1}{2}2(t_j-o_j)\frac{\partial(t_j-o_j)}{\partial o_j}\\&=-(t_j-o_j)\end{align}
+$$
+
+接下来考虑第二项，既然 $o_j=\sigma(net_j)$，导数 $\frac{\partial o_j}{\partial net_j}$ 就是 sigmoid 函数的导数，而我们已经指出 sigmoid 函数的导数为 $\sigma(net_j)(1-\sigma(net_j))$，所以：
+
+$$
+\frac{\partial o_j}{\partial net_j}=\frac{\partial \sigma(net_j)}{\partial net_j}=o_j(1-o_j)
+$$
+
+结合第一项、第二项可得：
+
+$$
+\frac{\partial E_d}{\partial net_j}=-(t_j-o_j)o_j(1-o_j)
+$$
+
+$$
+\Delta w_{ij}=-\eta\frac{\partial E_d}{\partial net_j}x_{ij}=\eta(t_j-o_j)o_j(1-o_j)x_{ij}
+$$
+
+注意，这个训练法则恰恰就是之前算法中的输出单元权值更新法则。此外，可以看到 $\delta_k$ 与 $-\frac{\partial E_d}{\partial net_k}$ 的值相等，在后面的推导中，将使用 $\delta_i$ 来表示任意单元 $i$ 的 $-\frac{\partial E_d}{\partial net_i}$。
+
+#### 隐藏单元的权值训练法则
+
+对于网络中的内部单元或者说隐藏单元的情况，推导 $w_{ij}$ 必须考虑 $w_{ij}$ 间接地影响网络输出，从而影响 $E_d$。由于这个原因，我们需要定义网络中单元 $j$ 的所有直接下游(immediately downstream)单元的集合（也就是直接输入中包含单元 $j$ 的输出的所有单元），用 $Downstream(j)$ 表示。因为 $net_j$ 仅能通过 $Downstream(j)$ 中的单元影响网络输出（在影响 $E_d$），所以可以得到如下推导：
+
+$$
+\begin{align}\frac{\partial E_d}{\partial net_j}&=\sum_{k \in Downstream(j)}\frac{\partial E_d}{\partial net_k}\frac{\partial net_k}{\partial net_j}\\&=\sum_{k \in Downstream(j)}-\delta_k\frac{\partial net_k}{\partial net_j}\\&=\sum_{k \in Downstream(j)}-\delta_k\frac{\partial net_k}{\partial o_j}\frac{\partial o_j}{\partial net_j}\\&=\sum_{k \in Downstream(j)}-\delta_kw_{jk}\frac{\partial o_j}{\partial net_j}\\&=\sum_{k \in Downstream(j)}-\delta_kw_{jk}o_j(1-o_j)\end{align}
+$$
+
+重新组织各项并使用 $\delta_j$ 表示 $-\frac{\partial E_d}{\partial net_j}$，我们得到：
+
+$$
+\delta_j=o_j(1-o_j)\sum_{k \in Downstream(j)}\delta_kw_{jk}
+$$
+
+$$
+\Delta w_{ij}=\eta\delta_jx_{ij}
+$$
+
+上面的更新任意有向无环网络结构内部单元权值的一般法则，我们之前算法中的公式是 $Downstream(j)=outputs$ 时的一个特例。
+
+在下一篇[《神经网络（下）：反向传播算法的说明和深度学习》](/2017/05/06/article58/)中，我们会进一步探讨反向传播算法中的一些细节问题。
+
+### 参考
+
+周志华《机器学习》  
+Tom M. Mitchell《机器学习》

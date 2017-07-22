@@ -1,0 +1,92 @@
+---
+layout:     post
+title:      "Flatabulous：优秀的扁平化Ubuntu主题"
+subtitle:   "系统美化"
+date:       2015-10-12 12:00:00
+author:     "Xiaosheng"
+header-img: "img/bg/bg_article_8.jpg"
+catalog: true
+tags:
+    - Linux
+    - 系统美化
+---
+
+![img](/img/article/article_8_1.jpg)
+
+## Flatabulous
+
+Flatabulous 是一款为 Ubuntu 以及其他 debian 分支 Linux 设计的扁平化主题。它建立在一款简洁的扁平化主题之上，在这里要感谢 @steftrikia 和 Satyajit Sahoo 之前所做的工作。
+
+先来预览一下 Flatabulous 主题的效果：
+
+![img](/img/article/article_8_2.jpg)
+
+*terminal 终端*
+
+![img](/img/article/article_8_3.jpg)
+
+*Dashboard*
+
+![img](/img/article/article_8_4.jpg)
+
+*使用 Sublime Text 3 查看 JavaScript 代码*
+
+![img](/img/article/article_8_5.jpg)
+
+*文件管理器*
+
+![img](/img/article/article_8_6.jpg)
+
+*设定菜单*
+
+## 安装
+
+(1) 下载并安装 [**Ubuntu tweak tool**](https://github.com/tualatrix/ubuntu-tweak)。
+
+> 作者于 2015 年正式停止了对该项目的维护，所以已经无法再通过添加 PPA 源的方式来安装了。
+>
+> 目前在 [ubuntuupdates](http://www.ubuntuupdates.org/) 网站上，有人重新制作了个 xenial 16.04 版本能用的 deb 包和 PPA 源，但既然作者都不更新维护了，也就不推荐通过 PPA 源来安装了。
+>
+> 建议直接从 [http://www.ubuntuupdates.org/package/getdeb_apps/xenial/apps/getdeb/ubuntu-tweak](http://www.ubuntuupdates.org/package/getdeb_apps/xenial/apps/getdeb/ubuntu-tweak) 上下载 **ubuntu-tweak_0.8.7-1~getdeb2~xenial_all.deb**，然后通过 `sudo dpkg - i ubuntu-tweak_0.8.7-1~getdeb2~xenial_all.deb` 来安装，如果安装期间发现报依赖错误了，再执行 `sudo apt-get install -f` 来修复依赖安装。
+
+(2) 点击[**此处**](https://github.com/anmoljagetia/Flatabulous/archive/master.zip)下载 Flatabulous 主题的源码，并解压出目录。
+
+(3) 在当前用户主目录下创建 *.theme* 目录：
+
+```bash
+mkdir ~/.themes
+```
+
+这是一个隐藏文件夹，你可以打开文件管理器，切换到用户主目录(Home)，再按下 `Ctrl + H` 来显示目录下所有文件和目录。
+
+将之前解压出的 Flatabulous 主题的源码文件夹复制到 *.themes* 目录下。
+
+(4) 安装图标主题，这里选择 **ultra-flat-icons** 主题，它共有蓝色(推荐)、橙色和薄荷绿三种颜色可以选择。我们通过下面的命令来安装图标主题：
+
+```bash
+sudo add-apt-repository ppa:noobslab/icons
+sudo apt-get update
+sudo apt-get install ultra-flat-icons
+```
+
+当然, 你也可以通过
+
+```bash
+sudo apt-get install ultra-flat-icons-orange
+```
+
+或者 
+
+```bash
+sudo apt-get install ultra-flat-icons-green
+```
+
+来安装另两种颜色的主题。其他的扁平化主题也可以选择使用，例如 **Numix** 和 **Flattr**。
+
+(5) 按下 super 键，搜索 **Ubuntu Tweak** 并打开。切换到 tweaks 选项卡下，在 theme 选项下选择 **Flatabulous** 主题，在 icon 选项下选择 **ultra-flat-icons**。最后**重启电脑**，大功告成！
+
+## 关于
+
+主题的作者是 [**Anmol Jagetia**](http://github.com/anmoljagetia)，如果有任何问题或者建议可以[**联系他**](mailto:hello@anmoljagetia.me)。
+
+该主题在 [**MIT**](http://anmoljagetia.mit-license.org) 协议下发行。

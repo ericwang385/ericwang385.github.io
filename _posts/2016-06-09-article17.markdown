@@ -1,0 +1,122 @@
+---
+layout:     post
+title:      "LIBSVM使用说明（下）：寻找最优参数"
+subtitle:   "LIBSVM使用指南"
+date:       2016-06-09 12:00:00
+author:     "Xiaosheng"
+header-img: "img/bg/bg_article_15.jpg"
+catalog: true
+tags:
+    - 机器学习
+    - SVM
+---
+
+在训练分类器的过程中，寻找各项参数的最优值也是很重要的一个环节，不同参数值的选择通常会对分类的效果产生很大的影响。LIBSVM 在 tools 文件夹下提供了两个用于寻找最优参数的 Python 文件 grid.py 和 easy.py。
+
+- grid.py 用于对使用 RBF 核函数的 C-SVM 分类器进行最优参数选择，它通过在训练集上进行交叉验证来寻找最优的 C 和 gamma 值。
+- easy.py 则是提供从分类器训练、参数优选到分类（预测）的“一条龙服务”，因而它对 grid.py、svm-train、svm-scale 和 svm-predict 都进行了调用。
+
+在[《LIBSVM使用说明（上）：介绍和安装》](/2016/06/06/article15/)中，我们已经在 grid.py 和 easy.py 中配置好了路径，所以这里可以直接使用。因为这两个文件都是 Python 程序，所以请确保计算机中已正确安装 Python 2.7。
+
+## 1. grid.py 的使用
+
+这里继续使用 LIBSVM 自带的测试数据集 heart\_scale 来进行演示（位于 libsvm 主目录下），与[《LIBSVM使用说明（中）：函数和Python接口》](/2016/06/08/article16/)相同，首先将 *heart\_scale* 文件的前 200 的样本行保存到文件 *heart\_train\_set* 中，作为训练集文件，然后将 *heart\_scale* 文件剩余的样本行保存到文件 *heart\_test\_set* 中，作为测试集文件。
+
+### 选项
+
+**grid.py** 的使用方法为：
+
+```bash
+grid.py [grid_options] [svm_options] dataset
+```
+
+**grid\_options** 具体有以下各项：
+
+- -log2c {begin,end,step \| "null"} : 设置 C 系数的范围（默认为 -5,15,2）
+  * begin,end,step —  C 系数的范围 = 2^{begin,...,begin+k*step,...,end}
+  * "null" — 不对 C 系数进行优选
+- -log2g {begin,end,step \| "null"} : 设置 gamma 系数的范围（默认为 3,-15,-2）
+  * begin,end,step — gamma 系数的范围 = 2^{begin,...,begin+k*step,...,end}
+  * "null" — 不对 gamma 系数进行优选
+- -v n : n-折交叉验证（默认为 5）
+- -svmtrain pathname : 设置 sum-train 程序的路径
+- -gnuplot {pathname \| "null"} : 设置 gnuplot 的路径，"null"代表不绘制图形
+- -out {pathname \| "null"} : 设置输出文件的路径和名称（默认为 dataset.out），"null"代表不输出文件
+- -png pathname : 设置输出图形文件的路径和名称（默认为 dataset.png）
+- -resume [pathname] : 使用已有的输出文件继续寻找最优参数（默认为 dataset.out）
+
+**svm\_options** 用来为 svm-train 添加一些额外的设置，dataset 就是要进行参数寻优的数据集文件。
+
+### 例子
+
+接下来演示在训练集 *heart\_train\_set* 文件上进行最优参数选择。其中，C 和 gamma 系数的范围都设为 2^-5~2^5，step 为 1，其余参数使用默认值（切换到 tools 目录）：
+
+```bash
+# Windows
+python grid.py -log2c -5,5,1 -log2g -5,5,1 ..\heart_train_set
+# Linux/Mac
+python grid.py -log2c -5,5,1 -log2g -5,5,1 ../heart_train_set
+```
+
+屏幕会不断输出不同 C 和 gamma 取值情况下的分类准确率，并在最后一行输出最优的参数选择：
+
+```bash
+...
+[local] 4.0 1.0 68.5 (best c=8.0, g=0.03125, rate=85.0)
+[local] 4.0 -2.0 75.5 (best c=8.0, g=0.03125, rate=85.0)
+[local] 4.0 4.0 55.5 (best c=8.0, g=0.03125, rate=85.0)
+8.0 0.03125 85.0
+```
+
+并且在当前目录下生成输出文件 *heart\_train\_set.out* 和对应图形文件 *heart\_train\_set.png*：
+
+![grid](/img/article/article_17_1.png)
+
+通过测试，在 C = 8.0、gamma = 0.03125 的情况下分类准确率最高，为 85.0%。
+
+## 2. easy.py 的使用
+
+**easy.py** 比 **grid.py** 更加便于使用，它提供从分类器训练、参数优选到分类（预测）的“一条龙服务”，使用者不需要关心整个过程中的任何细节，**easy.py** 全部会自动完成。**easy.py** 的使用方法非常简单：
+
+```bash
+easy.py training_file [testing_file]
+```
+
+*training\_file* 是训练集文件，*testing\_file* 是测试集文件，如果省略 *testing\_file* 就是简易版的 **grid.py**，并且所有参数都使用默认值。
+
+### 例子
+
+同样地，接下来演示在训练集 **heart\_train\_set** 和测试集 **heart\_test\_set** 上进行自动训练分类的过程。（切换到 tools 目录）：
+
+```bash
+# Windows
+python easy.py ..\heart_train_set ..\heart_test_set
+# Linux/Mac
+python easy.py ../heart_train_set ../heart_test_set
+```
+
+执行完成后，会在当前目录下生成分类过程中的一系列中间文件，并且会在屏幕上输出各步骤的提示信息：
+
+```bash
+Scaling training data...
+WARNING: original #nonzeros 2502
+       > new      #nonzeros 2508
+If feature values are non-negative and sparse, use -l 0 rather than the default -l -1
+Cross validation...
+Best c=32.0, g=0.0078125 CV rate=85.5
+Training...
+Output model: heart_train_set.model
+Scaling testing data...
+WARNING: original #nonzeros 876
+       > new      #nonzeros 878
+If feature values are non-negative and sparse, use -l 0 rather than the default -l -1
+Testing...
+Accuracy = 82.8571% (58/70) (classification)
+Output prediction: heart_test_set.predict
+```
+
+可以看到 **easy.py** 首先对数据进行了缩放，然后在训练集上进行交叉验证寻找最优参数，最终选择 C = 32.0，gamma = 0.0078125，最后在测试集上进行测试，70 个样本正确分类 58 个，分类正确率 82.8571%。
+
+## 结语
+
+本文演示了使用 **grid.py** 和 **easy.py** 在数据集上进行参数优选的过程，这也是介绍 LIBSVM 的最后一篇文章。由于小昇水平有限，所以文中难免会存在错误，如果你有任何意见或建议，欢迎在下方留言。

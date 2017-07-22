@@ -1,0 +1,413 @@
+---
+layout:     post
+title:      "MongoDB C#驱动快速上手指南"
+subtitle:   "使用C#操作MongoDB"
+date:       2016-09-15 12:00:00
+author:     "Xiaosheng"
+header-img: "img/bg/bg_article_24.jpg"
+catalog: true
+tags:
+    - 数据库
+    - MongoDB
+    - NoSQL
+    - C#
+---
+
+> 翻译改编自[《MongoDB Driver Quick Tour》](http://mongodb.github.io/mongo-csharp-driver/2.3/getting_started/quick_tour/)
+
+## 创建连接
+
+下面的例子演示了创建连接的三种方法，连接一个或多个运行在本地机器上的 MongoDB 服务器。
+
+```csharp
+// 直接连接到单个 MongoDB 服务器
+// (不会自动发现 primary 节点， 即使它是复制集的成员)
+var client = new MongoClient();
+
+// 也可以使用连接字符串创建
+var client = new MongoClient("mongodb://localhost:27017");
+
+// 或者连接到一个复制集，自动发现 primary 节点，提供一个成员的种子列表
+var client = new MongoClient("mongodb://localhost:27017,localhost:27018,localhost:27019");
+```
+
+**注意：**`client` 实例对象保持一个连接池，存放所有与连接字符串中服务器的连接。
+
+## MongoClient
+
+`MongoClient` 对象实际上代表了一个指向数据库的连接池；即使我们使用多个线程，也只需要一个 MongoClient 类对象。
+
+通常我们对于一个给定的集群只需要创建一个 `MongoClient` 实例对象，然后在整个应用中使用它。如果我们创建了多个 `MongoClients` 实例对象，并且它们的连接字符串完全相同，那么它们将会共享同一个连接池。
+
+## 获取数据库
+
+要获取一个数据库, 我们只需把数据库的名字作为参数传递给 `client` 的 `GetDatabase` 方法。如果指定的数据库不存在，它将会在第一次使用时自动创建。
+
+```csharp
+var database = client.GetDatabase("foo");
+```
+
+现在 `database` 变量保存了一个指向数据库 "foo" 的引用。
+
+
+## 获取一个集合
+
+要获取一个集合以便在其上进行各种操作, 我们只需把集合的名字作为参数传给 `database` 的 `GetCollection<TDocument>`方法。如果指定的集合不存在，它将会在第一次使用时自动创建。
+
+```csharp
+var collection = database.GetCollection<BsonDocument>("bar");
+```
+
+`collection` 变量现在保存了一个指向数据库 "foo" 中 "bar" 集合的引用。
+
+**注意：**类型参数 `TDocument` 代表了集合中元素（文档）的模式（类型）。在上面的例子中，我们使用 `BsonDocument` 表明我们没有预先定义的模式。当然在这里我们也可以使用简单的 C# 对象（POCOs）。 详情请查阅 [mapping documentation](http://mongodb.github.io/mongo-csharp-driver/2.3/reference/bson/mapping/)。
+
+
+## 插入一个文档
+
+一旦我们拥有了 `collection` 实例对象，我们就可以向集合中插入文档了。举一个例子，考虑下面的 JSON 文档；这个文档包含一个内嵌文档的数据域 `info`：
+
+```csharp
+{
+     "name": "MongoDB",
+     "type": "database",
+     "count": 1,
+     "info": {
+         "x": 203,
+         "y": 102
+     }
+}
+```
+
+创建一个使用 .NET 驱动的文档, 我们使用 `BsonDocument` 类。我们也可以使用这个类来创建内嵌文档。
+
+```csharp
+var document = new BsonDocument
+{
+    { "name", "MongoDB" },
+    { "type", "Database" },
+    { "count", 1 },
+    { "info", new BsonDocument
+        {
+            { "x", 203 },
+            { "y", 102 }
+        }}
+};
+```
+
+要将一个文档插入集合, 我们可以使用 `InsertOne` 或者 `InsertOneAsync`方法。
+
+```csharp
+collection.InsertOne(document);
+```
+```csharp
+await collection.InsertOneAsync(document);
+```
+
+**注意：**.NET 驱动是完全支持异步操作的。 关于异步操作（async）和等待（await）的更多信息，请查阅 [MSDN documentation](https://msdn.microsoft.com/zh-cn/library/hh191443.aspx).
+
+无论对于同步还是异步版本，所有的 API 都是可用的。
+
+## 插入多个文档
+
+要向集合中插入多个文档，我们可以使用 `InsertMany` 或者 `InsertManyAsync` 方法。
+
+```csharp
+// 生成 100 个包含计数器的文档，计数器范围为 0 到 99
+var documents = Enumerable.Range(0, 100).Select(i => new BsonDocument("counter", i));
+```
+```csharp
+collection.InsertMany(documents);
+```
+```csharp
+await collection.InsertManyAsync(documents);
+```
+
+## 统计文档数量
+
+如今我们已经向集合中插入了 101 个文档，现在可以通过 `Count` 或者 `CountAsync` 方法来检查集合中是否已经包含了所有插入的文档。下面的代码应该把变量 count 的值设置为 101。
+
+```csharp
+var count = collection.Count(new BsonDocument());
+```
+```csharp
+var count = await collection.CountAsync(new BsonDocument());
+```
+
+**注意：**传给 `CountAsync` 方法的空 `BsonDocument` 参数 是一个过滤器。上面的代码中, 传入的是一个空的过滤器，表示统计所有的文档数量。
+
+## 集合查询
+
+我们使用 `Find`方法来查询集合。`Find` 方法返回一个`IFindFluent<TDocument, TProjection>` 实例对象，它提供了一个流接口来指定操作的参数。
+
+### 查询集合中的第一条文档
+
+要获取集合中的第一条文档，我们可以使用 `FirstOrDefault` 或者 `FirstOrDefaultAsync`方法。`FirstOrDefault` 返回第一个文档或者 null。如果查询仅仅需要匹配一个文档，或者我们仅仅对查询结果中的第一个文档感兴趣，这个方法就很有用。
+
+下面的示例打印出在集合中找到的第一个文档。
+
+```csharp
+var document = collection.Find(new BsonDocument()).FirstOrDefault();
+Console.WriteLine(document.ToString());
+```
+```csharp
+var document = await collection.Find(new BsonDocument()).FirstOrDefaultAsync();
+Console.WriteLine(document.ToString());
+```
+
+上面的例子应该打印出下面的文档：
+
+```csharp
+{ 
+	"_id": ObjectId("551582c558c7b4fbacf16735"),
+  	"name": "MongoDB", 
+  	"type": "database", 
+  	"count": 1,
+  	"info": { "x" : 203, "y" : 102 } 
+}
+```
+
+**注意：** `_id` 元素是 MongoDB 自动添加的，所以上面代码中的值与你显示的是不同的。. MongoDB 保留的数据域的名字以 "_" 开始 并且在内部使用 "$"。
+
+### 查询一个集合中所有的文档
+
+要检索一个集合中所有的文档，我们可以使用 `ToList` 或者 `ToListAsync` 方法。当预期返回文档的数量很小时，这个方法就很有用。 
+
+```csharp
+var documents = collection.Find(new BsonDocument()).ToList();
+```
+```csharp
+var documents = await collection.Find(new BsonDocument()).ToListAsync();
+```
+
+如果预期返回文档的数量很大或者它们可以被迭代地处理，那么 `ForEachAsync` 方法会为每一个返回的文档调用一次回调。
+
+```csharp
+await collection.Find(new BsonDocument()).ForEachAsync(d => Console.WriteLine(d));
+```
+
+要迭代所有使用同步 API 返回的文档，我们可以通过使用了 `ToEnumerable` 适配器方法的 C# foreach 语句：
+
+```csharp
+var cursor = collection.Find(new BsonDocument()).ToCursor();
+foreach (var document in cursor.ToEnumerable())
+{
+    Console.WriteLine(document);   
+}
+```
+
+所有上面的例子都会在终端上打印相同的信息。关于迭代使用的更多信息，请参考 [reference documention]()。
+
+## 通过过滤器获取一个文档
+
+我们可以创建一个过滤器，并且将它传递给 `Find` 方法来获取集合中某个符合条件的文档。例如，如果我们想要找出数据域 “i” 的值为 71 的文档，可以使用下面的代码：
+
+```csharp
+var filter = Builders<BsonDocument>.Filter.Eq("i", 71);
+```
+```csharp
+var document = collection.Find(filter).First();
+Console.WriteLine(document);
+```
+```csharp
+var document = await collection.Find(filter).FirstAsync();
+Console.WriteLine(document);
+```
+
+上面的例子会仅仅打印出一个文档：
+
+```csharp
+{ "_id" : ObjectId("5515836e58c7b4fbc756320b"), "i" : 71 }
+```
+
+**注意：**通过灵活使用过滤器（Filter），排序器（Sort）和映射器（Projection）可以简明方便地构建查询。
+
+## 通过过滤器获取多个文档
+
+我们也可以从集合中获取符合条件的多个文档。例如，如果我们想要获得所有 `i > 50` 的文档, 我们可以这样写：
+
+```csharp
+var filter = Builders<BsonDocument>.Filter.Gt("i", 50);
+```
+```csharp
+var cursor = collection.Find(filter).ToCursor();
+foreach (var document in cursor.ToEnumerable())
+{
+    Console.WriteLine(document);   
+}
+```
+```csharp
+await collection.Find(filter).ForEachAsync(document => Console.WriteLine(document));
+```
+
+我们也可以指定一个范围, 例如说 `50 < i <= 100`：
+
+```csharp
+var filterBuilder = Builders<BsonDocument>.Filter;
+var filter = filterBuilder.Gt("i", 50) & filterBuilder.Lte("i", 100);
+```
+```csharp
+var cursor = collection.Find(filter).ToCursor();
+foreach (var document in cursor.ToEnumerable())
+{
+    Console.WriteLine(document);   
+}
+```
+```csharp
+await collection.Find(filter).ForEachAsync(document => Console.WriteLine(document));
+```
+
+## 文档排序
+
+我们可以向一个查询中添加排序器，通过调用 `Sort` 方法实现。下面我们使用 `Exists` 过滤器构建方法和 `Descending` 排序器构建方法来对文档进行排序:
+
+```csharp
+var filter = Builders<BsonDocument>.Filter.Exists("i");
+var sort = Builders<BsonDocument>.Sort.Descending("i");
+```
+```csharp
+var document = collection.Find(filter).Sort(sort).First();
+```
+```csharp
+var document = await collection.Find(filter).Sort(sort).FirstAsync();
+```
+
+## 映射数据域
+
+很多时候我们并不需要返回一个文档中包含的所有的数据。映射器（Projection）构建器可以帮助我们构建一个映射器，将这个映射器作为参数传给查询操作，就可以实现仅返回文档部分数据域的效果。下面我们排除 "_id" 数据域，并且输出第一个匹配的文档：
+
+```csharp
+var projection = Builders<BsonDocument>.Projection.Exclude("_id");
+```
+```csharp
+var document = collection.Find(new BsonDocument()).Project(projection).First();
+Console.WriteLine(document.ToString());
+```
+```csharp
+var document = await collection.Find(new BsonDocument()).Project(projection).FirstAsync();
+Console.WriteLine(document.ToString());
+```
+
+## 更新文档
+
+MongoDB 支持很多种 [更新操作](http://docs.mongodb.org/manual/reference/operator/update-field/)。
+
+要更新最多一个文档（如果没有匹配的文档则更新 0 个），我们可以使用 `UpdateOne` 或者 `UpdateOneAsync` 方法，他们可以使用过滤器匹配文档并且更新文档。
+
+现在我们更新被过滤器 `i == 10` 匹配到的第一个文档，并且把 `i` 的值设为 `110`：
+
+```csharp
+var filter = Builders<BsonDocument>.Filter.Eq("i", 10);
+var update = Builders<BsonDocument>.Update.Set("i", 110);
+```
+```csharp
+collection.UpdateOne(filter, update);
+```
+```csharp
+await collection.UpdateOneAsync(filter, update);
+```
+
+如果要更新所有与过滤器匹配的文档，我们可以使用 `UpdateMany` 或者 `UpdateManyAsync` 方法。下面我们更新所有 `i < 100` 的文档，并且把 `i` 的值增加 `100`。
+
+```csharp
+var filter = Builders<BsonDocument>.Filter.Lt("i", 100);
+var update = Builders<BsonDocument>.Update.Inc("i", 100);
+```
+```csharp
+var result = collection.UpdateMany(filter, update);
+
+if (result.IsModifiedCountAvailable)
+{
+	Console.WriteLine(result.ModifiedCount);
+}
+```
+```csharp
+var result = await collection.UpdateManyAsync(filter, update);
+
+if (result.IsModifiedCountAvailable)
+{
+	Console.WriteLine(result.ModifiedCount);
+}
+```
+
+更新方法会返回一个`更新结果`，在`更新结果`中会提供关于更新操作的信息，包括在本次更新操作中被修改的文档数量。
+
+**注意：**由于 MongoDB 服务器版本的问题，在连接较早版本的服务器时某些功能可能不可用。
+
+## 删除文档
+
+要删除最多一个文档（如果没有匹配的文档则删除 0 个），我们可以使用 `DeleteOne` 或者 `DeleteOneAsync`方法：
+
+```csharp
+var filter = Builders<BsonDocument>.Filter.Eq("i", 110));
+```
+```csharp
+collection.DeleteOne(filter);
+```
+```csharp
+await collection.DeleteOneAsync(filter);
+```
+
+要删除所有与过滤器匹配的文档，我们可以使用 `DeleteMany` 或者 `DeleteManyAsync` 方法。下面我们删除所有 `i >= 100` 的文档：
+
+```csharp
+var filter = Builders<BsonDocument>.Filter.Gte("i", 100));
+```
+```csharp
+var result = collection.DeleteMany(filter);
+
+Console.WriteLine(result.DeletedCount);
+```
+```csharp
+var result = await collection.DeleteManyAsync(filter);
+
+Console.WriteLine(result.DeletedCount);
+```
+
+删除方法会返回一个`删除结果`，在`删除结果`中会提供关于删除操作的信息，包括被删除的文档数量。
+
+## 批量操作
+
+MongoDB 支持两种类型的批量操作：
+
+- **有序批量操作**
+
+ 按顺序执行所有的操作，当遇到第一个错误时立即报错。
+
+- **无序批量操作**
+
+ 执行所有的操作并且报告所有操作中出现的错误。无顺序的批量修改操作不保证操作的执行顺序。
+
+下面我们通过两个简单的例子，查看一下有序和无序操作：
+
+```csharp
+var models = new WriteModel<BsonDocument>[] 
+{
+	new InsertOneModel<BsonDocument>(new BsonDocument("_id", 4)),
+	new InsertOneModel<BsonDocument>(new BsonDocument("_id", 5)),
+	new InsertOneModel<BsonDocument>(new BsonDocument("_id", 6)),
+	new UpdateOneModel<BsonDocument>(
+		new BsonDocument("_id", 1), 
+		new BsonDocument("$set", new BsonDocument("x", 2))),
+	new DeleteOneModel<BsonDocument>(new BsonDocument("_id", 3)),
+	new ReplaceOneModel<BsonDocument>(
+		new BsonDocument("_id", 3), 
+		new BsonDocument("_id", 3).Add("x", 4))
+};
+```
+```csharp
+// 有序的批量修改操作 - 保证操作的执行顺序
+collection.BulkWrite(models);
+
+// 无序的批量修改操作 - 不保证操作的执行顺序
+collection.BulkWrite(models, new BulkWriteOptions { IsOrdered = false });
+```
+```csharp
+// 有序的批量修改操作 - 保证操作的执行顺序
+await collection.BulkWriteAsync(models);
+
+// 无序的批量修改操作 - 不保证操作的执行顺序
+await collection.BulkWriteAsync(models, new BulkWriteOptions { IsOrdered = false });
+```
+
+**注意：**如果连接的 MongoDB 服务器版本早于 2.6，那么不建议使用批量修改方法，因为 2.6 版本是第一个支持批量写入命令（插入、更新、删除）的版本，允许驱动程序处理`批量写入结果`和`批量写入错误`。在早于 2.6 版本的服务器上，这个方法依然可以使用，但是执行效果会变差，因为每一个写操作一次只能执行一条命令。

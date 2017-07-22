@@ -1,0 +1,148 @@
+---
+layout:     post
+title:      "SVM 支持向量机（下）"
+subtitle:   "软间隔与 SMO 算法"
+date:       2017-04-17 12:00:00
+author:     "Xiaosheng"
+header-img: "img/bg/bg_article_34.jpg"
+catalog: true
+tags:
+    - 机器学习
+---
+
+在[《SVM 支持向量机（上）》](/2017/04/16/article53/)中我们介绍了 SVM 的基本概念，包括 SVM 的对偶问题以及核函数的使用。本文将继续探讨 SVM 的基本原理，并着重介绍软间隔的概念和 SVM 拉格朗日乘子具体的求解算法 SMO。
+
+### 软间隔与正则化
+
+在之前的讨论中，我们一直假定训练样本在原始空间或者映射后的特征空间中是线性可分的，即存在一个超平面能将不同类的样本完全划分开。然而，在现实任务中往往很难确定合适的核函数使得训练样本在特征空间中线性可分；退一步说，即便恰好找到了某个核函数使得训练集在特征空间中线性可分，也很难断定这个貌似线性可分的结果不是由于过拟合所造成的。
+
+例如，看下面两张图：
+
+![1](/img/article/article_54_1.jpg)
+
+可以看到当数据集中存在离群点（可能是噪声）时会造成超平面的移动，间隔缩小，可见以前的模型对噪声非常敏感。再有甚者，如果离群点在另外一个类中，那么这时候就线性不可分了。
+
+缓解该问题的一个办法是允许 SVM 在一些样本上出错。具体来说，前面介绍的 SVM 形式是要求所有样本均满足约束：
+
+$$y^{(i)}(\boldsymbol{w}^T\boldsymbol{x}^{(i)}+b)\ge1$$
+
+即要求所有样本都必须划分正确，这称为“硬间隔”(hard margin)，而软间隔则是允许某些样本不满足这个约束。根据软间隔的思想，我们把最优化问题调整为：
+
+$$\min_{\gamma,\boldsymbol{w},b}\frac{1}{2}||\boldsymbol{w}||^2+C\sum_{i=1}^m\xi_i$$
+
+$$\begin{align}\mathbb{s.t.}\quad &y^{(i)}(\boldsymbol{w}^T\boldsymbol{x}^{(i)}+b)\ge1-\xi_i,\quad i=1,\cdots,m\\&\xi_i\ge0,\quad i=1,\cdots,m\end{align}$$
+
+这就是常用的“软间隔支持向量机”。非负变量 $\xi_i$ 被称为“松弛变量”(slack variables)，引入 $\xi_i$ 后就允许某些样本点的函数间隔小于 $1$ 甚至为负，即样本点可以在间隔区间之内甚至在对方的区域内。
+
+而放松限制条件后，我们需要重新调整目标函数，以对离群点进行处罚，目标函数后面加上的 $C\sum_{i=1}^m\xi_i$ 就表示离群点越多，目标函数值越大，而我们要求的是尽可能小的目标函数值。这里的 $C$ 是离群点的权重， $C$ 越大表明离群点对目标函数影响越大，也就是越不希望看到离群点。我们看到，目标函数控制了离群点的数目和程度，使大部分样本点仍然遵守限制条件。
+
+与之前的做法相似，我们也使用拉格朗日对偶性将最优化问题转换为对偶问题。首先，通过拉格朗日乘子法构造上面优化问题的拉格朗日函数：
+
+$$\begin{align}L(\boldsymbol{w},b,\boldsymbol{\alpha},\boldsymbol{\xi},\boldsymbol{\mu})&=\frac{1}{2}||\boldsymbol{w}||^2+C\sum_{i=1}^{m}\xi_i\\&\quad+\sum_{i=1}^m\alpha_i\big(1-\xi_i-y^{(i)}(\boldsymbol{w}^T\boldsymbol{x}^{(i)}+b)\big)-\sum_{i=1}^m\mu_i\xi_i\end{align}$$
+
+其中 $\alpha_i\ge0$，$\mu_i\ge0$ 是拉格朗日乘子。根据拉格朗日对偶性，原始问题的对偶问题是极大极小问题：
+
+$$\max_{\boldsymbol{\alpha}}\min_{\boldsymbol{w},b,\boldsymbol{\xi}}L(\boldsymbol{w},b,\boldsymbol{\alpha},\boldsymbol{\xi},\boldsymbol{\mu})$$
+
+1. 求 $\min_{\boldsymbol{w},b,\boldsymbol{\xi}}L(\boldsymbol{w},b,\boldsymbol{\alpha},\boldsymbol{\xi},\boldsymbol{\mu})$
+
+   将拉格朗日函数 $L(\boldsymbol{w},b,\boldsymbol{\alpha},\boldsymbol{\xi},\boldsymbol{\mu})$ 对 $\boldsymbol{w}$，$b$，$\xi_i$ 的偏导为零可得：
+
+   $$\boldsymbol{w}=\sum_{i=1}^m\alpha_iy^{(i)}\boldsymbol{x}^{(i)}​$$
+
+   $$\sum_{i=1}^m\alpha_iy^{(i)}=0$$
+
+   $$C=\alpha_i+\mu_i$$
+
+   将上面三式代入拉格朗日函数，即得：
+
+   $$\min_{\boldsymbol{w},b,\boldsymbol{\xi}}L(\boldsymbol{w},b,\boldsymbol{\alpha},\boldsymbol{\xi},\boldsymbol{\mu})=\sum_{i=1}^m\alpha_i-\frac{1}{2}\sum_{i=1}^m\sum_{j=1}^m\alpha_i\alpha_jy^{(i)}y^{(j)}\langle\boldsymbol{x}^{(i)},\boldsymbol{x}^{(j)}\rangle$$
+
+   > **推导过程**
+   >
+   > $$\begin{align}L(\boldsymbol{w},b,\boldsymbol{\alpha},\boldsymbol{\xi},\boldsymbol{\mu})&=\frac{1}{2}\boldsymbol{w}^T\boldsymbol{w}+C\sum_{i=1}^m\xi_i+\sum_{i=1}^m\alpha_i-\sum_{i=1}^m\alpha_i\xi_i\\&\quad-\sum_{i=1}^m\alpha_iy^{(i)}(\boldsymbol{w}^T\boldsymbol{x}^{(i)})-\sum_{i=1}^m\alpha_iy^{(i)}b-\sum_{i=1}^m\mu_i\xi_i\end{align}$$
+   >
+   > 因为 $\sum_{i=1}^m\alpha_iy^{(i)}=0$，所以 $\sum_{i=1}^m\alpha_iy^{(i)}b=0$；又因为 $C=\alpha_i+\mu_i$，所以
+   >
+   > $$C\sum_{i=1}^m\xi_i-\sum_{i=1}^m\alpha_i\xi_i-\sum_{i=1}^m\mu_i\xi_i=\sum_{i=1}^m(C-\alpha_i-\mu_i)\xi_i=0$$
+   >
+   > 所以上式可以进一步简化为：
+   >
+   > $$\begin{align}L(\boldsymbol{w},b,\boldsymbol{\alpha},\boldsymbol{\xi},\boldsymbol{\mu})&=\frac{1}{2}\boldsymbol{w}^T\boldsymbol{w}+\sum_{i=1}^m\alpha_i-\sum_{i=1}^m\alpha_iy^{(i)}(\boldsymbol{w}^T\boldsymbol{x}^{(i)})\\&=\frac{1}{2}\boldsymbol{w}^T\sum_{i=1}^m\alpha_iy^{(i)}\boldsymbol{x}^{(i)}-\boldsymbol{w}^T\sum_{i=1}^m\alpha_iy^{(i)}\boldsymbol{x}^{(i)}+\sum_{i=1}^m\alpha_i\\&=-\frac{1}{2}\bigg(\sum_{i=1}^m\alpha_iy^{(i)}\boldsymbol{x}^{(i)}\bigg)^T\sum_{i=1}^m\alpha_iy^{(i)}\boldsymbol{x}^{(i)}+\sum_{i=1}^m\alpha_i\\&=\sum_{i=1}^m\alpha_i-\frac{1}{2}\sum_{i=1}^m\sum_{j=1}^m\alpha_i\alpha_jy^{(i)}y^{(j)}\langle\boldsymbol{x}^{(i)},\boldsymbol{x}^{(j)}\rangle\end{align}$$
+
+2. 求 $\min_{\boldsymbol{w},b,\boldsymbol{\xi}}L(\boldsymbol{w},b,\boldsymbol{\alpha},\boldsymbol{\xi},\boldsymbol{\mu})$ 对 $\boldsymbol{\alpha}$ 的极大，即是对偶问题：
+
+   $$\max_{\boldsymbol{\alpha}}\sum_{i=1}^m\alpha_i-\frac{1}{2}\sum_{i=1}^m\sum_{j=1}^m\alpha_i\alpha_jy^{(i)}y^{(j)}\langle\boldsymbol{x}^{(i)},\boldsymbol{x}^{(j)}\rangle$$
+
+   $$\begin{align}\mathbb{s.t.}\quad&\sum_{i=1}^m\alpha_iy^{(i)}=0,\\&0\le\alpha_i\le C,\quad i=1,2,\cdots,m\end{align}$$
+
+
+将上式与硬间隔下的对偶问题对比可以看到，两者唯一的差别就在于对偶变量的约束不同，$\alpha_i$ 又多了 $\alpha_i\le C$ 的限制。同样地，对软间隔支持向量机的 KKT 条件也发生了变化：
+
+$$\begin{cases}\alpha_i\ge0,\quad\mu_i\ge0\\y^{(i)}(\boldsymbol{w}^T\boldsymbol{x}^{(i)}+b)-1+\xi_i\ge0\\\alpha_i(y^{(i)}(\boldsymbol{w}^T\boldsymbol{x}^{(i)}+b)-1+\xi_i)=0\\\xi_i\ge0,\mu_i\xi_i=0\end{cases}$$
+
+于是，对任意训练样本 $(\boldsymbol{x}^{(i)},y^{(i)})$，总有 $\alpha_i=0$ 或 $y^{(i)}(\boldsymbol{w}^T\boldsymbol{x}^{(i)}+b)=1-\xi_i$。若 $\alpha_i=0$，则该样本不会对模型有任何影响；若 $\alpha_i\gt0$，则必有 $y^{(i)}(\boldsymbol{w}^T\boldsymbol{x}^{(i)}+b)=1-\xi_i$，即该样本是支持向量：由 $C=\alpha_i+\mu_i$，若 $\alpha_i\lt C$，则 $\mu_i\gt0$，进而有 $\xi_i=0$，即该样本恰在最大间隔边界上；若 $\alpha_i=C$，则有 $\mu_i=0$，此时若 $\xi_i\le 1$ 则该样本落在最大间隔内部，若 $\xi_i\gt1$ 则该样本被错误分类。由此可以看出，软间隔支持向量机的最终模型仅与支持向量有关。 
+
+#### 使用 SMO 算法求解对偶问题
+
+#### 坐标上升算法(Coordinate ascent)
+
+![2](/img/article/article_54_2.jpg)
+
+假设要求解最优化问题：
+
+$$\max_\boldsymbol{\alpha}W(\alpha_1,\alpha_2,\cdots,\alpha_m)$$
+
+每次循环固定除 $\alpha_i$ 之外的所有 $\alpha_j(j\ne i)$，这时 $W$ 可以看作只是关于 $\alpha_i$ 的函数， 那么直接对 $\alpha_i$ 求导优化即可。这里我们进行最大化求导的顺序 $i$ 是从 $1$ 到 $m$，可以通过更改 优化顺序来使 $W$ 能够更快地增加并收敛。如果 $W$ 在内循环中能够很快地达到最优，那么坐标上升法会是一个很高效的求极值方法。
+
+上图展示了坐标上升算法的执行过程，椭圆代表了二次函数的各个等高线，变量数为 $2$，起始坐标是 $(2,-2)$。图中的直线是迭代优化的路径，可以看到每一步都会向最优值前进一步，而且前进路线是平行于坐标轴的，因为每一步只优化一个变量。
+
+坐标上升算法的核心思想是一次只在一个维度上使得函数最大化，所以它的循环次数可能会比较多，但是循环内部的计算会比较简单。
+
+#### SMO 算法
+
+我们已经知道，硬间隔支持向量机需要解决的问题，就是求解对偶问题：
+
+$$\max_{\boldsymbol{\alpha}}W(\boldsymbol{\alpha})=\sum_{i=1}^m\alpha_i-\frac{1}{2}\sum_{i=1}^m\sum_{j=1}^m\alpha_i\alpha_jy^{(i)}y^{(j)}(\boldsymbol{x}_i^T\boldsymbol{x}_j)$$
+
+$$\begin{align}\mathbb{s.t.}\quad&\sum_{i=1}^m\alpha_iy^{(i)}=0\\&\alpha_i\ge0,\quad i=1,2,\cdots,m\end{align}$$
+
+要解决的是在参数 $\{\alpha_1,\alpha_2,\cdots,\alpha_m\}$ 上求 $W$ 最大值的问题，而 $\boldsymbol{x}^{(i)}$ 和 $y^{(i)}$ 都是已知数。按照坐标上升算法的思路，我们首先固定除 $\alpha_1$ 以外的所有参数，然后在 $\alpha_1$ 上求极值。但是由于存在约束 $\sum_{i=1}^m\alpha_iy^{(i)}=0$，若固定 $\alpha_1$ 之外的其他变量，则 $\alpha_1$ 可由其他变量导出，这样 $\alpha_1$ 就不再是变量了。
+
+于是，SMO 算法每次选择两个变量 $\alpha_i$ 和 $\alpha_j$，并固定其他参数。这样，在参数初始化后，SMO 不断执行如下两个步骤直至收敛：
+
+- 选取一对需更新的变量 $\alpha_i$ 和 $\alpha_j$；
+- 固定 $\alpha_i$ 和 $\alpha_j$ 以外的参数，求解对偶问题，获得更新后的 $\alpha_i$ 和 $\alpha_j$。
+
+其中第一步中 $\alpha_i$ 和 $\alpha_j$ 的选取采用启发式方法。
+
+> 注意到只需选取的 $\alpha_i$ 和 $\alpha_j$ 中有一个不满足 KKT 条件，目标函数就会在迭代后减小。直观来看，KKT 条件违背的程度越大，则变量更新后可能导致的目标函数值减幅越大。于是 SMO 先选取违背 KKT 条件程度最大的变量。第二个变量应该选择一个使目标函数值减小最快的变量，但是由于比较各变量所对应的目标函数值减幅的复杂度过高，因此 SMO 采用了一个启发式：使选取的两变量所对应样本之间的间隔最大。一种直观的解释是，这样的两个变量有很大的差别，与对两个相似的变量进行更新相比，对它们进行更新会带给目标函数值更大的变化。
+
+SMO 算法之所以高效，恰由于在固定其他参数后，仅优化两个参数的过程能做到非常高效。具体来说，仅考虑 $\alpha_i$ 和 $\alpha_j$ 时，对偶问题中的约束可以重写为：
+
+$$\alpha_iy^{(i)}+\alpha_jy^{(j)}=c,\quad\alpha_i\ge0,\alpha_j\ge0$$
+
+其中 $c=-\sum_{k\ne i,j}\alpha_ky^{(k)}$ 是使 $\sum_{i=1}^m\alpha_iy^{(i)}=0$ 成立的常数，用 $\alpha_iy^{(i)}+\alpha_jy^{(j)}=c$ 消去 $W$ 函数中的 $\alpha_j$，则得到了一个关于 $\alpha_i$ 的单变量二次规划问题，仅有的约束是 $\alpha_i\ge0$。不难发现，这样的二次规划问题具有闭式解，于是不必调用数值优化算法即可高效地计算出更新后的 $\alpha_i$ 和 $\alpha_j$。
+
+如何确定偏移项 $b$ 呢？注意到对任意支持向量 $(\boldsymbol{x}^{(s)},y^{(s)})$ 都有 $y^{(s)}(\boldsymbol{w}^T\boldsymbol{x}^{(s)}+b)=1$，即：
+
+$$y^{(s)}\Bigg(\sum_{i\in S}\alpha_iy^{(i)}\langle\boldsymbol{x}^{(i)},\boldsymbol{x}^{(s)}\rangle+b\Bigg)=1$$
+
+其中 $S=\{i\mid\alpha_i\gt0,i=1,2,\cdots,m\}$ 为所有支持向量的下表集。理论上，可选取任意支持向量并通过求解上式获得 $b$，但在现实任务中常采用一种更鲁棒的做法：使用所有支持向量求解的平均值：
+
+$$b=\frac{1}{|S|}\sum_{s\in S}\Bigg(y^{(s)}-\sum_{i\in S}\alpha_iy^{(i)}\langle\boldsymbol{x}^{(i)},\boldsymbol{x}^{(s)}\rangle\Bigg)$$
+
+对于后来我们介绍的软间隔支持向量机，我们也可以通过类似地方法求解得到，仅仅是对多了一个约束 $\alpha_i\le C$。
+
+### LIBSVM
+
+LIBSVM 是台湾大学[林智仁](http://www.csie.ntu.edu.tw/~cjlin/)（Lin Chih-Jen）教授等开发设计的一个操作简单、易于使用、快速有效的 SVM 软件包。可以解决分类问题（包括 C-SVC、n-SVC ）、回归问题（包括 e-SVR、n-SVR ）以及分布估计（one-class-SVM）等问题，提供了线性、多项式、径向基和 S 形函数四种常用的核函数供选择，可以有效地解决多类问题、交叉验证选择参数、对不平衡样本加权、多类问题的概率估计等。
+
+具体使用方法，可以参考我写的[《LIBSVM使用说明（上）：介绍和安装》](/2016/06/06/article15/)、[《LIBSVM使用说明（中）：函数和Python接口》](/2016/06/08/article16/) 和 [《LIBSVM使用说明（下）：寻找最优参数》](/2016/06/09/article17/)。
+
+### 参考
+
+Logos[《斯坦福CS229机器学习课程笔记五：支持向量机 Support Vector Machines》](http://logos.name/archives/304)  
+李航《统计学习方法》  
+周志华《机器学习》  
+JerryLead《支持向量机SVM》

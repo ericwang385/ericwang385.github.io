@@ -1,0 +1,221 @@
+---
+layout:     post
+title:      "LIBSVM使用说明（中）：函数和Python接口"
+subtitle:   "LIBSVM使用指南"
+date:       2016-06-08 12:00:00
+author:     "Xiaosheng"
+header-img: "img/bg/bg_article_15.jpg"
+catalog: true
+tags:
+    - 机器学习
+    - SVM
+---
+
+在上一篇文章[《LIBSVM使用说明（上）：介绍和安装》](/2016/06/06/article15/)中，简单地介绍了 LIBSVM 以及其安装过程中的许多细节。本文将以 LIBSVM 自带的数据样本 heart_scale 为例，演示如何使用 LIBSVM 各种函数以及如何在 Python 下调用 LIBSVM 对数据样本进行分类。
+
+## 1. LIBSVM 接受的数据格式
+
+要使用 LIBSVM 对样本集进行分类，首先要按指定的格式构建样本文件，这样 LIBSVM 才能对其进行处理。LIBSVM 对样本文件的格式要求为：
+
+``` 
+<label> <index1>:<value1> <index2>:<value2> ...
+```
+
+其中，`<label>` 对于分类问题代表样本的类别，使用整数表示，支持多个类别；对于回归问题代表目标变量，可以是任意实数。`<index>:<value>` 表示特征项，其中 `<index>` 代表特征项的编号，使用从 1 开始的整数表示，可以不连续；`<value>` 代表该特征项对应的特征值，使用实数表示。在实际的操作中，如果样本缺少某个特征项，可以直接省略，LIBSVM 会自动把该项的特征值赋为 0。
+
+**警告：**LIBSVM 对特征项的顺序有着严格的要求，每一个样本中的特征项，必须按照特征项编号升序排列，否则会报 **RuntimeError: get no rate** 错误。
+
+小提示：如果在 Python 中，对于每一个样本，都按照 `<index1>:<value>` 的格式将所有特征项保存到特征列表 featureList 中，那么可以使用下面的代码对该样本的特征项排序。
+
+```python
+featureList.sort(key=lambda x:int(x.split(':')[0]))
+```
+
+LIBSVM 自带了一个供使用者参考和测试的样本集 heart_scale，可以在 libsvm 主目录下找到。
+
+**数据缩放**
+
+为了防止因为某个特征过大或过小，从而导致各特征项在训练中起的作用不平衡，在使用前通常需要对数据进行缩放。而且在核计算中，会用到内积运算或 exp 运算，不平衡的数据可能造成计算困难。LIBSVM 提供了一个 **svm-scale** 程序，用来对样本数据进行缩放。`svm-scale` 的使用方法为：
+
+```python
+svm-scale [options] data_filename
+```
+
+options 包含以下各项：
+
+- -l lower : 设定特征值的下限（默认 -1）
+- -u upper : 设定特征值的上限（默认 +1)
+- -y y\_lower y\_upper : 是否对目标值同时进行缩放（默认不进行缩放)，y\_lower为下限、y\_upper为上限
+- -s save_filename : 将缩放的规则保存为规则文件
+- -r restore\_filename : 按照规则文件restore\_filename进行缩放
+
+**data_filename** 为待缩放的数据文件。
+
+svm-scale 默认将缩放后的结果输出到屏幕，如果想要保留缩放后的结果，可以使用输出重定向。如果要将 heart_scale 中的特征值缩放到 0~100 并保存到文件 *out.txt* 中，可以这样写（Windows 下先切换到 windows 目录，Linux/Mac 切换到 libsvm-x.x 目录）：
+
+```bash
+# Windows
+svm-scale.exe -l 0 -u 100 ..\heart_scale > out.txt
+# Linux/Mac
+./svm-scale -l 0 -u 100 heart_scale > out.txt
+```
+
+打开 *out.txt* 就能看到数据缩放后的结果。
+
+## <a name="python-quick-tor"></a>2. Python 接口快速上手
+
+接下来通过一个例子，演示如何在 Python 下使用 LIBSVM 对样本集进行分类：
+
+```python
+>>> from svmutil import *
+# 从符合 LIBSVM 指定格式的样本文件中读取数据
+# y 是 Label 列表，x 是特征项列表
+>>> y, x = svm_read_problem('../heart_scale')
+# 以前 200 个样本作为训练集，将训练出的分类模型保存为 m
+>>> m = svm_train(y[:200], x[:200], '-c 4')
+# 以 200 个之后的所有样本作为测试集，使用分类模型 m 进行分类
+>>> p_label, p_acc, p_val = svm_predict(y[200:], x[200:], m)
+Accuracy = 84.2857% (59/70) (classification)
+```
+
+可以看到在测试集上的准确率为 84.3%，70 个测试样本中 59 个被正确分类。
+
+- **svm\_read\_problem** 函数负责从符合 LIBSVM 格式的数据集文件中读取数据，并且返回两个列表，第一个列表存放所有数据样本的 label 值，第二个列表存放所有数据样本的特征项（编号和值），每一个样本的特征项使用一个字典保存。
+- **svm\_train** 函数负责训练并生成分类模型，它接受三个参数，分别是训练集的 label 值列表、特征项列表以及对 SVM 的参数设置（省略将使用默认设置），函数在训练完成后返回分类模型。
+- **svm\_predict** 函数使用生成的分类模型对测试集进行分类（预测），如果给出了测试集正确的 label 值，还会输出分类正确率，函数返回三个值，分别是：预测的 label 值列表，包含分类准确率、均方误差、平方关联系数的 tuple，以及目标变量或者概率估计列表。
+
+## 3. 函数详解
+
+### 3.1 svm-train
+
+svm-train 函数负责在训练集上进行训练，然后生成分类器模型。svm-train 的用法为：
+
+```bash
+svm-train [options] training_set_file [model_file]
+```
+
+options 包含以下各项：
+
+- -s svm_type : 设置 SVM 的类型（默认为 0）
+  * 0 — C-SVC（多元分类器）
+  * 1 — nu-SVC（多元分类器）
+  * 2 — one-class SVM
+  * 3 — epsilon-SVR（回归）
+  * 4 — nu-SVR（回归）
+- -t kernel_type : 设置核函数的类型（默认为 2）
+  * 0 — linear 线性：u'*v
+  * 1 — polynomial 多项式：(gamma\*u'*v + coef0)^degree
+  * 2 — radial basis function RBF函数：exp(-gamma*\|u-v\|^2)
+  * 3 — sigmoid: tanh(gamma\*u'*v + coef0)
+  * 4 — precomputed kernel (kernel values in training_set_file)
+- -d degree : 设置核函数中的 degree 值（默认为 3）（针对多项式核函数）
+- -g gamma : 设置核函数中的 gamma 系数 (默认为 1/特征数)（针对多项式/RBF/sigmoid核函数）
+- -r coef0 : 设置核函数中的 coef0 值（默认为 0）（针对多项式/sigmoid核函数）
+- -c cost : 设置 C-SVC、epsilon-SVR 和 nu-SVR 的 C 系数（默认为 1）
+- -n nu : 设置 nu-SVC、one-class SVM 和 nu-SVR 的 nu 系数（默认为 0.5）
+- -p epsilon : 设置 epsilon-SVR 的损失函数中的 epsilon 值（默认为 0.1）
+- -m cachesize : 设置 cache 内存大小， 以 MB 为单位（默认为 100）
+- -e epsilon : 设置终止条件（默认为 0.001）
+- -h shrinking : 是否使用启发式，0 或 1（默认为 1）
+- -b probability_estimates : 是否训练一个 SVC 或 SVR 模型用于概率估计，0 或 1（默认为 0）
+- -wi weight : 设置 weight*C 中第 i 类的 C 系数（用于 C-SVC）（默认为 1）
+- -v n: n-折交叉验证模式
+- -q : 安静模式 (无输出)
+
+**training\_set\_file** 是要进行训练的数据集文件，**model\_file** 用于保存训练结束后产生分类模型，该参数是可选项，如果不设置将使用默认的文件名。
+
+同样地，以 **heart\_scale** 样本集为例。首先将 *heart\_scale* 文件的前 200 的样本行保存到文件 *heart\_train\_set* 中，作为训练集文件。然后将 *heart\_scale* 文件剩余的样本行保存到文件 *heart\_test\_set* 中，作为测试集文件。
+
+接下来进行训练建模。以下代码在 **heart\_train\_set** 上进行训练，并将分类模型保存到文件 *heart\_model* 中，除了惩罚系数 C 设置为 4 以外，所有参数都使用默认值（Windows 下先切换到 windows 目录，Linux/Mac 切换到 libsvm-x.x 目录）：
+
+```bash
+# Windows
+svm-train.exe -c 4 ..\heart_train_set heart_model
+# Linux/Mac
+./svm-train -c 4 heart_train_set heart_model
+```
+
+如果屏幕输出类似下面的提示，并且成功生成 **heart\_model** 文件，则训练顺利完成：
+
+```bash
+optimization finished, #iter = 257
+nu = 0.351161
+obj = -225.628984, rho = 0.636110
+nSV = 91, nBSV = 49
+Total nSV = 91
+```
+
+在 Python 中，可以使用 **svm_read_problem** 和 **svm_train** 函数实现相同的效果，可以参考之前 [Python 接口快速上手](#python-quick-tor) 中的代码，svm 的选项设置以参数形式传入 `svm-train`。
+
+### 3.2 svm-predict
+
+svm-predict 函数根据训练出的分类模型，对测试集（数据集）进行分类。svm-predict 的用法为：
+
+```bash
+svm-predict [options] test_file model_file output_file
+```
+
+**options** 包含以下各项：
+
+- -b probability_estimates : 设置是否需要进行概率估计预测，0 或 1（默认为 0）; one-class SVM 只能设置为 0
+- -q : 安静模式（无输出）
+
+test_file 是要进行分类（预测）的数据集文件，格式需要符合 LIBSVM 的规定；model_file 是使用 `svm-train` 在训练集上进行训练后产生的分类模型；output_file 是 `svm-predict` 的输出文件，存放预测的 label 结果。如果知道测试集正确的 label 值，`svm-predict` 还会输出正确率。
+
+接下来，继续使用 heart_scale 数据集进行测试。之前的 `svm-train` 已经生成了分类模型文件 heart_model，而测试集则存放在 heart_test_set 文件中，所以对测试集进行分类（预测）的代码可以这样写，将结果存放在 heart_test_result 文件中（Windows 下先切换到 windows 目录，Linux/Mac 切换到 libsvm-x.x 目录）：
+
+```bash
+# Windows
+svm-predict.exe ..\heart_test_set heart_model heart_test_result
+# Linux/Mac
+./svm-predict heart_test_set heart_model heart_test_result
+```
+
+如果程序顺利执行，会在屏幕上输出在测试集上进行分类（预测）的正确率：
+
+```bash
+Accuracy = 84.2857% (59/70) (classification)
+```
+
+在 Python 中，可以使用 **svm\_predict** 函数实现相同的效果，可以参考之前 [Python 接口快速上手](#python-quick-tor) 中的代码，可以看到二者在测试集上的分类结果是完全相同的。
+
+## 4. 附加说明
+
+### 4.1 svm-train 输出结果说明
+
+调用 `svm-train` 函数进行训练建模后，成功的情况下屏幕会输出类似以下的提示：
+
+``` 
+optimization finished, #iter = 257
+nu = 0.351161
+obj = -225.628984, rho = 0.636110
+nSV = 91, nBSV = 49
+Total nSV = 91
+```
+
+其中：`#iter` 是迭代次数，`nu` 是选择的核函数类型的参数，`obj` 为 SVM 文件转换为的二次规划求解得到的最小值，`rho` 为判决函数的偏置项 *b*，`nSV` 是标准支持向量个数（0 < a[i] < c），`nBSV` 是边界上的支持向量个数（a[i] = c），`Total nSV` 是支持向量总个数（对于两类来说，因为只有一个分类模型，所以 Total nSV = nSV，但是对于多类，这个是各个分类模型的 nSV 之和）。
+
+### 4.2 model_file 说明
+
+调用 `svm-train` 函数进行训练建模后，成功的情况下会生成分类模型文件：
+
+``` 
+svm_type c_svc         //所选择的 svm 类型，默认为 c_svc
+kernel_type rbf        //训练采用的核函数类型，此处为 RBF 核
+gamma 0.0769231        //RBF 核的 gamma 系数
+nr_class 2             //类别数，此处为二元分类问题
+total_sv 91            //支持向量总个数
+rho 0.63611            //判决函数的偏置项 b
+label 1 -1             //类别标识
+nr_sv 44 47            //每个类的支持向量机的个数
+SV
+//以下为各个类的权系数及相应的支持向量
+4 1:0.166667 2:1 3:-0.333333 4:-0.433962 5:-0.383562 6:-1 7:-1 8:0.0687023 9:-1 10:-0.903226 11:-1 12:-1 13:1 
+4 1:0.333333 2:1 3:-1 4:-0.245283 5:-0.506849 6:-1 7:-1 8:0.129771 9:-1 10:-0.16129 12:0.333333 13:-1 
+0.06691877193998118 2:1 3:1 4:-0.132075 5:-0.648402 6:1 7:1 8:0.282443 9:1 11:1 12:-1 13:1 
+...
+```
+
+## 5. 结语
+
+关于 LIBSVM 的函数和 Python 接口就说到这里，在下一篇[《LIBSVM使用说明（下）：寻找最优参数》](/2016/06/09/article17/)中，将介绍如何通过寻找最优参数来提高分类准确率。

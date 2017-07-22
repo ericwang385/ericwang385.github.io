@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<link rel="stylesheet" type="text/css" href="stylesheets/xspost.css" media="screen">
+	<title>撤销修改 - Git 教程</title>
+</head>
+<body>
+
+	<h3>
+		<a href="index.html">Git 教程</a>
+		>
+		<a href="menu.html">目录</a>
+		>
+	</h3>
+
+	<h1>撤销修改</h1>
+
+	<p>自然，你是不会犯错的。不过现在是凌晨两点，你正在赶一份工作报告，你在 readme.txt 中添加了一行：</p>
+
+	<pre><code>$ cat readme.txt
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+My stupid boss still prefers SVN.
+</code></pre>
+
+	<p>在你准备提交前，一杯咖啡起了作用，你猛然发现了“stupid boss”可能会让你丢掉这个月的奖金！</p>
+
+	<p>
+		既然错误发现得很及时，就可以很容易地纠正它。你可以删掉最后一行，手动把文件恢复到上一个版本的状态。如果用
+		<code>git status</code>
+		查看一下：
+	</p>
+
+	<pre><code>$ git status
+# On branch master
+# Changes not staged for commit:
+#   (use "git add &lt;file&gt;..." to update what will be committed)
+#   (use "git checkout -- &lt;file&gt;..." to discard changes in working directory)
+#
+#       modified:   readme.txt
+#
+no changes added to commit (use "git add" and/or "git commit -a")
+</code></pre>
+
+	<p>
+		你可以发现，Git 会告诉你，
+		<code>git checkout -- file</code>
+		可以丢弃工作区的修改：
+	</p>
+
+	<pre><code>$ git checkout -- readme.txt</code></pre>
+
+	<p>
+		命令
+		<code>git checkout -- readme.txt</code>
+		意思就是，把 readme.txt 文件在工作区的修改全部撤销，这里有两种情况：
+	</p>
+
+	<p>一种是 readme.txt 自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；</p>
+
+	<p>一种是 readme.txt 已经添加到暂存区后，又作了修改，现在，撤销修改就是回到暂存区中该文件的状态。</p>
+
+	<p>
+		总之，就是让这个文件回到最近一次
+		<code>git commit</code>
+		或
+		<code>git add</code>
+		时的状态。
+	</p>
+
+	<p>现在，看看 readme.txt 的文件内容：</p>
+
+	<pre><code>$ cat readme.txt
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+</code></pre>
+
+	<p>文件内容果然复原了。</p>
+
+	<p>
+		<code>git checkout -- file</code>
+		命令中的
+		<code>--</code>
+		很重要，没有
+		<code>--</code>
+		，就变成了“切换到另一个分支”的命令，我们在后面的分支管理中会再次遇到
+		<code>git checkout</code>
+		命令。
+	</p>
+
+	<p>
+		现在假定是凌晨 3 点，你不但写了一些胡话，还
+		<code>git add</code>
+		到暂存区了：
+	</p>
+
+	<pre><code>$ cat readme.txt
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+My stupid boss still prefers SVN.
+
+$ git add readme.txt
+</code></pre>
+
+	<p>
+		庆幸的是，在
+		<code>commit</code>
+		之前，你发现了这个问题。用
+		<code>git status</code>
+		查看一下，修改只是添加到了暂存区，还没有提交：
+	</p>
+
+	<pre><code>$ git status
+# On branch master
+# Changes to be committed:
+#   (use "git reset HEAD &lt;file&gt;..." to unstage)
+#
+#       modified:   readme.txt
+#
+</code></pre>
+
+	<p>
+		Git 同样告诉我们，用命令
+		<code>git reset HEAD file</code>
+		可以把暂存区的修改撤销掉（unstage），重新放回工作区：
+	</p>
+
+	<pre><code>$ git reset HEAD readme.txt
+Unstaged changes after reset:
+M       readme.txt
+</code></pre>
+
+	<p>
+		<code>git reset</code>
+		命令既可以回退版本，也可以把暂存区的修改回退到工作区。当我们用
+		<code>HEAD</code>
+		时，表示最新的版本。
+	</p>
+
+	<p>
+		再用
+		<code>git status</code>
+		查看一下，现在暂存区是干净的，工作区有修改：
+	</p>
+
+	<pre><code>$ git status
+# On branch master
+# Changes not staged for commit:
+#   (use "git add &lt;file&gt;..." to update what will be committed)
+#   (use "git checkout -- &lt;file&gt;..." to discard changes in working directory)
+#
+#       modified:   readme.txt
+#
+no changes added to commit (use "git add" and/or "git commit -a")
+</code></pre>
+
+	<p>还记得如何丢弃工作区的修改吗？</p>
+
+	<pre><code>$ git checkout -- readme.txt
+
+$ git status
+# On branch master
+nothing to commit (working directory clean)
+</code></pre>
+
+	<p>整个世界终于清静了！</p>
+
+	<p>
+		现在，假设你不但改错了东西，还从暂存区提交到了版本库，怎么办呢？还记得
+		<a href="4-1.html">版本回退</a>
+		一节吗？可以回退到上一个版本。不过，这是有条件的，就是你还没有把自己的本地版本库推送到远程。还记得 Git 是分布式版本控制系统吗？我们后面会讲到远程版本库，一旦你把“stupid boss”提交推送到远程版本库，你就真的惨了……
+	</p>
+
+	<h2>小结</h2>
+
+	<p>又到了小结时间。</p>
+
+	<p>
+		场景 1：当你改乱了工作区某个文件的内容，想直接丢弃工作区的修改时，用命令
+		<code>git checkout — file</code>
+		。
+	</p>
+
+	<p>
+		场景 2：当你不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，第一步用命令
+		<code>git reset HEAD file</code>
+		，就回到了场景 1，第二步按场景 1 操作。
+	</p>
+
+	<p>
+		场景 3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考
+		<a href="4-1.html">版本回退</a>
+		一节，不过前提是没有推送到远程库。
+	</p>
+
+	<br />
+
+	<div align="center">
+		<a href="4-3.html" class="btn-black">上一节</a>
+		<a href="menu.html" class="btn-black">返回目录</a>
+		<a href="4-5.html" class="btn-black">下一节</a>
+	</div>
+
+</body>
+</html>

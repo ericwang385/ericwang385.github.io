@@ -1,12 +1,12 @@
 # Site settings
-title: Xs-Huxblog
-SEOTitle: Xs-HuxBlog
+title: 小昇的博客
+SEOTitle: 小昇的博客 | Xs Blog
 header-img: img/bg/bg_index.jpg
 email: jsksxs360@163.com
 description: ""
 keyword: ""
-url: "http://jsksxs360.github.io"              # your host, for absolute URL
-baseurl: "/xs-huxblog"                             # for example, '/blog' if your blog hosted on 'host/blog'
+url: "http://xiaosheng.me"              # your host, for absolute URL
+baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
 # SNS settings
 weibo_username: jsksxs360
@@ -33,8 +33,8 @@ markdown: kramdown
 kramdown:
   input: GFM                            # use Github Flavored Markdown !important
 
-# UY comment
-uy: false                               # whether or not using uy comment
+# UY
+uy: true                                # whether or not using uy
 uy_uid: 2138472
 
 # Baidu Share
@@ -60,7 +60,7 @@ friends: [
         href: "http://huangxuan.me"
     },
     {
-        title: "Xs blog",
-        href: "http://xiaosheng.me"
+        title: "WWT-blog",
+        href: "http://wuwt.me"
     }
 ]

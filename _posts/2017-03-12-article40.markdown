@@ -1,0 +1,194 @@
+---
+layout:     post
+title:      "NumPy 快速入门"
+subtitle:   "让矩阵运算变得简单"
+date:       2017-03-12 12:00:00
+author:     "Xiaosheng"
+header-img: "img/bg/bg_article_40.jpg"
+catalog: true
+tags:
+    - 机器学习
+---
+
+最近参考[《机器学习实战》](http://www.ituring.com.cn/book/1021)开始写一些机器学习的基本算法，发现在各类算法中矩阵运算都非常地常见。如果自己编写代码进行矩阵的计算固然可以，但不仅麻烦而且执行效率还低。Python 正是以大量的第三方库而见长的，那么有没有专精于矩阵运算的库呢？答案是肯定的。
+
+Python 中有一个著名的库，提供了大量矩阵处理的函数，也就是我今天要介绍的 [NumPy](http://www.numpy.org/)。NumPy 使用起来非常方便，大大简化了对矩阵的操作难度，而且 NumPy 的内部运算使用 C 语言编写，因而执行起来非常地快速。本文只对一些基本的函数作简单的介绍，更多内容请浏览完整的[官方文档]([http://docs.scipy.org/doc/](http://docs.scipy.org/doc/))。
+
+## NumPy
+
+NumPy 包含了两种自定义的数据类型：数组和矩阵，二者在处理上稍有不同。我们如果自己对数组或矩阵进行处理，难免要通过循环语句来完成，而在使用 NumPy 时则可以省去这些语句。
+
+### 数组
+
+下面是数组处理的一些例子：
+
+```python
+>>> from numpy import array
+>>> mm=array((1, 1, 1))
+>>> pp=array((1, 2, 3))
+>>> pp+mm
+array([2, 3, 4])
+```
+
+而如果只用常规Python的话，完成上述功能需要使用 `for` 循环。另外在Python中还有其他一些需要循环的处理过程，例如在每个元素上乘以常量2，而在NumPy下就可以写成：
+
+```python
+>>> pp*2
+array([2, 4, 6])
+```
+
+还有对每个元素平方：
+
+```python
+>>> pp**2
+array([1, 4, 9])
+```
+
+可以像列表中一样访问数组里的元素：
+
+```python
+>>> pp[1]
+2
+```
+
+NumPy 中也支持多维数组：
+
+```python
+>>> jj = array([[1, 2, 3], [1, 1, 1]])
+```
+
+多维数组中的元素也可以像列表中一样访问：
+
+```python
+>>> jj[0]
+array([1, 2, 3])
+>>> jj[0][1]
+2
+```
+
+也可以用矩阵方式访问：
+
+```python
+>>> jj[0,1]
+2
+```
+
+当把两个数组乘起来的时候，两个数组的元素将对应相乘：
+
+```python
+>>> a1=array([1, 2,3])
+>>> a2=array([0.3, 0.2, 0.3])
+>>> a1*a2
+array([ 0.3, 0.4, 0.9])
+```
+
+### 矩阵
+
+与使用数组一样，需要从 NumPy 中导入 `matrix` 或者 `mat` 模块：
+
+```python
+>>> from numpy import mat, matrix
+>>> ss = mat([1, 2, 3])
+>>> ss
+matrix([[1, 2, 3]])
+>>> mm = matrix([1, 2, 3])
+>>> mm
+matrix([[1, 2, 3]])
+```
+
+可以访问矩阵中的单个元素：
+
+```python
+>>> mm[0, 1]
+2
+```
+
+可以把 Python 列表转换成 NumPy 矩阵：
+
+```python
+>>> pyList = [5, 11, 1605]
+>>> mat(pyList)
+matrix([[ 5, 11, 1605]])
+```
+
+现在试试将上述两个矩阵相乘：
+
+```python
+>>> mm*ss
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "c:\Python27\lib\site-packages\numpy\matrixlib\defmatrix.py",
+line 330, i
+n __mul__
+    return N.dot(self, asmatrix(other))
+ValueError: objects are not aligned
+```
+
+可以看到出现了一个错误：乘法不能执行。矩阵数据类型的运算会强制执行数学中的矩阵运算，1×3 的矩阵是不能与 1×3 的矩阵相乘的（左矩阵的列数和右矩阵的行数必须相等）。这时需要将其中一个矩阵转置，使得可以用 3×1 的矩阵乘以 1×3 的矩阵，或者是 1×3 的矩阵乘以 3×1 的矩阵。NumPy 数据类型有一个转置方法，因此可以很方便地进行矩阵乘法运算：
+
+```python
+>>> mm*ss.T
+matrix([[14]])
+```
+
+这里调用了 `.T` 方法完成了 `ss` 的转置。知道矩阵的大小有助于上述对齐错误的调试，可以通过 NumPy 中的 `shape` 方法来查看矩阵或者数组的维数：
+
+```python
+>>> from numpy import shape
+>>> shape(mm)
+(1, 3)
+```
+
+如果需要把矩阵 `mm` 的每个元素和矩阵 `ss` 的每个元素对应相乘应该怎么办呢？这就是所谓的元素相乘法，可以使用NumPy的 `multiply` 方法：
+
+```python
+>>> from numpy import multiply
+>>> multiply(mm, ss)
+matrix([[1, 4, 9]])
+```
+
+此外，矩阵和数组还有很多有用的方法，如排序：
+
+```python
+>>> mm.sort()
+>>> mm
+matrix([[1, 2, 3]])
+```
+
+注意该方法是原地排序(即排序后的结果占用原始的存储空间)，所以如果希望保留数据的原序，必须事先做一份拷贝。也可以使用 `argsort()` 方法得到矩阵中每个元素的排序序号：
+
+```python
+>>> dd=mat([4, 5, 1])
+>>> dd.argsort()
+matrix([[2, 0, 1]])
+```
+
+可以计算矩阵的均值：
+
+```python
+>>> dd.mean()
+3.3333333333333335
+```
+
+如果想取出其中一行的元素，可以使用冒号（`:`）操作符和行号来完成。例如，要取出一个 2×3 的矩阵第一行元素，应该输入：
+
+```python
+>>> jj = mat([[1, 2, 3,], [8, 8, 8]])
+>>> shape(jj)
+(2, 3)
+>>> jj[1,:]
+matrix([[8, 8, 8]])
+```
+
+还可以指定要取出元素的范围。如果想得到第一行第 0 列和第 1 列的元素，可以使用下面的语句：
+
+```python
+>>> jj[1,0:2]
+matrix([[8, 8]])
+```
+
+这种索引方法能够简化 NumPy 的编程。
+
+## 参考
+
+[《机器学习实战》](http://www.ituring.com.cn/book/1021)

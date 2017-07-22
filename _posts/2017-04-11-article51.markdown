@@ -1,0 +1,187 @@
+---
+layout:     post
+title:      "CRF 条件随机场"
+subtitle:   "使用 Viterbi 算法寻找最优标注序列"
+date:       2017-04-11 12:00:00
+author:     "Xiaosheng"
+header-img: "img/bg/bg_article_40.jpg"
+catalog: true
+tags:
+    - 机器学习
+    - NLP
+---
+
+### 概率无向图模型的因子分解
+
+无向图 $G$ 中任何两个结点均有边连接的结点子集称为团(clique)。若 $C$ 是无向图 $G$ 的一个团，并且不能再加进任何一个 $G$ 的结点使其成为一个更大的团，则称此 $C$ 为最大团(maximal clique)。
+
+下图表示由 4 个结点组成的无向图。图中由 2 个结点组成的团有 5 个：$\{x_1,x_2\}$，$\{x_2,x_3\}$，$\{x_3,x_4\}$，$\{x_4,x_2\}$，$\{x_1,x_3\}$。有 2 个最大团：$\{x_1,x_2.x_3\}$ 和 $\{x_2,x_3,x_4\}$。而 $\{x_1,x_2,x_3,x_4\}$ 不是一个团，因为 $x_1$ 和 $x_4$ 没有边连接。
+
+![1](/img/article/article_51_1.png)
+
+将概率无向图模型的联合概率分布表示为其最大团上的随机变量的函数的乘积形式的操作，称为概率无向图模型的因子分解(factorization)。设无向图为 $G$，$C$ 为 $G$ 上的最大团，$Y_c$ 表示 $C$ 对应的随机变量集合。那么概率无向图模型的联合概率分布 $P(Y)$ 可写作图中所有最大团 $C$ 上的函数 $\psi_C(Y_C)$ 的乘积形式，即：
+
+$$P(Y)=\frac{1}{Z}\prod_C\psi_C(Y_C)$$
+
+其中，$\psi_C$ 为团 $C$ 对应的势函数(potential function)，用于对团 $C$ 中的变量关系进行建模，这里要求势函数严格为正，通常定义为 $\psi_C(Y_C)=\exp\{-E(Y_C)\}$，$Z=\sum_Y\prod_C\psi_C(Y_C)$ 为规范化因子(normalization factor)，以确保 $P(Y)$ 是被正确定义的概率。
+
+### 条件随机场
+
+条件随机场(Conditional Random Field，简称 CRF)是一种判别式无向图模型，是一种概率图模型中的马尔可夫网(Markov network)。条件随机场试图对多个变量在给定观测值后的条件概率进行建模。具体来说，若令观测序列为 $\mathbb{x}=\{x_1,x_2,\cdots,x_n\}$，与之相对应的标记序列为 $\mathbb{y}=\{y_1,y_2,\cdots,y_n\}$，则条件随机场的目标是构建条件概率模型 $P(\mathbb{y}\mid\mathbb{x})$。
+
+令 $G=(V,E)$ 表示结点与标记变量 $\mathbb{y}$ 中元素一一对应的无向图，$y_v$ 表示与结点 $v$ 对应的标记变量，$n(v)$ 表示结点 $v$ 的邻接结点。若图中每个变量 $y_v$ 都满足马尔可夫性，即：
+
+$$P(y_v\mid \mathbb{x},\mathbb{y}_w,w \neq v)=P(y_v\mid\mathbb{x},\mathbb{y}_{n(v)})$$
+
+则 $(\mathbb{y},\mathbb{x})$ 构成一个条件随机场。
+
+理论上来说，图 $G$ 可具有任意结构，只要能表示标记变量之间的条件独立性关系即可。但在实际应用中，尤其是对标记序列建模时，最常用的还是下图所示的链式结构，即“链式条件随机场”(chain-structured CRF)。
+
+![2](/img/article/article_51_2.png)
+
+条件随机场使用势函数和图结构上的团来定义条件概率 $P(\mathbb{y}\mid\mathbb{x})$。在链式条件随机场中主要包含两种关于标记变量的团，即单个标记变量 $\{y_i\}$ 以及相邻的标记变量 $\{y_{i-1},y_i\}$。通过选用指数势函数并引入特征函数，在给定观察序列 $\mathbb{x}$ 时，某个特定标记序列 $\mathbb{y}$ 的概率被定义为：
+
+$$P(\mathbb{y}\mid\mathbb{x})=\frac{1}{Z}\exp\bigg(\sum_j\sum_{i=2}^{n}\lambda_jt_j(y_{i-1},y_i,\mathbb{x},i)+\sum_k\sum_{i=1}^{n}\mu_ks_k(y_i,\mathbb{x},i)\bigg)$$
+
+其中 $t_j(y_{i-1},y_i,\mathbb{x},i)$ 是定义在观测序列的两个相邻标记位置上的转移特征函数(transition feature function)，用于刻画相邻标记变量之间的相关关系以及观测序列对它们的影响，$s_k(y_i,\mathbb{x},i)$ 是定义在观测序列的标记位置 $i$ 上的状态特征函数(status feature function)，用于刻画观测序列对标记变量的影响。$\lambda_j$ 和 $\mu_k$ 为参数，$Z$ 为规范化因子，用于确保上式是正确定义的概率，求和是在所有可能的输出序列上进行的：
+
+$$Z=\sum_y\exp\bigg(\sum_j\sum_{i=2}^{n}\lambda_jt_j(y_{i-1},y_i,\mathbb{x},i)+\sum_k\sum_{i=1}^{n}\mu_ks_k(y_i,\mathbb{x},i)\bigg)$$
+
+显然，要使用条件随机场，还需要定义合适的特征函数。特征函数通常是实值函数，以刻画数据的一些很可能成立或期望成立的经验特性。以词性标注任务为例，观测数据为单词序列，标记为相应的词性序列，我们可以把转移特征函数定义为：
+
+$$t_j(y_{i-1},y_i,\mathbb{x},i)=\begin{cases}1,& x_i=w\quad\mathbb{and}\quad y_{i-1}=POS1\quad\mathbb{and}\quad y_{i}=POS2\\0, &\mathbb{otherwise}\end{cases}$$
+
+即表示第 $i$ 个观测值 $x_i$ 为单词 $w$ 时，相应的标记 $y_{i-1}$ 和 $y_{i}$ 可能为 $POS1$ 和 $POS2$。状态特征函数则可以定义为：
+
+$$s_k(y_i,\mathbb{x},i)=\begin{cases}1,&y_i=POS1\quad\mathbb{and}\quad x_i=w\\0, &\mathbb{otherwise}\end{cases}$$
+
+即表示观测值 $x_i$ 为单词 $w$ 时，它所对应的标记可能为 $POS1$。
+
+### 条件随机场的简化形式
+
+条件随机场还可以由简化形式表示。注意到条件随机场式中同一特征在各个位置都有定义，可以对同一个特征在各个位置求和，将局部特征函数转化为一个全局特征函数，这样就可以将条件随机场写成权值向量和特征向量的内积形式，即条件随机场的简化形式。
+
+为简便起见，首先将转移特征和状态特征及其权值用统一的符号表示。设有 $M_1$ 个转移特征，$M_2$ 个状态特征，$M=M_1+M_2$，记
+
+$$f_m(y_{i-1},y_i,\mathbb{x},i)=\begin{cases}t_m(y_{i-1},y_i,\mathbb{x},i),&\quad m=1,2,\cdots,M_1\\s_k(y_i,\mathbb{x},i),&\quad m=M_1+k;\quad k=1,2,\cdots,M_2\end{cases}$$
+
+然后，对转移和状态特征在各个位置 $i$ 求和，记作：
+
+$$f_m(\mathbb{y},\mathbb{x})=\sum_{i=1}^nf_m(y_{i-1},y_i,\mathbb{x},i),\quad m=1,2,\cdots,M$$
+
+用 $w_m$ 表示特征 $f_m(\mathbb{y},\mathbb{x})$ 的权值，即：
+
+$$w_m=\begin{cases}\lambda_m,&\quad m=1,2,\cdots,M_1\\\mu_k,&\quad m=M_1+k;\quad k=1,2,\cdots,M_2\end{cases}$$
+
+于是，条件随机场可表示为：
+
+$$P(\mathbb{y}\mid\mathbb{x})=\frac{1}{Z}\exp\sum_{m=1}^Mw_mf_m(\mathbb{y},\mathbb{x})$$
+
+$$Z=\sum_y\exp\sum_{m=1}^Mw_mf_m(\mathbb{y},\mathbb{x})$$
+
+若以 $\mathbb{w}$ 表示权值向量，即 $\mathbb{w}=(w_1,w_2,\cdots,w_M)^T$。以 $F(\mathbb{y},\mathbb{x})$ 表示全局特征向量，即 $F(\mathbb{y},\mathbb{x})=(f_1(\mathbb{y},\mathbb{x}),f_2(\mathbb{y,\mathbb{x}}),\cdots,f_M(\mathbb{y},\mathbb{x}))^T$，则条件随机场可以写成向量 $\mathbb{w}$ 和 $F(\mathbb{y},\mathbb{x})$ 的内积形式：
+
+$$P_\mathbb{w}(\mathbb{y}\mid\mathbb{x})=\frac{\exp(\mathbb{w}\cdot F(\mathbb{y},\mathbb{x}))}{Z}$$
+
+其中 $Z=\sum_y\exp(\mathbb{w}\cdot F(\mathbb{y},\mathbb{x}))$
+
+### 条件随机场要解决的问题
+
+与隐马尔可夫模型类似，条件随机场也需要解决三个基本问题：概率计算、参数训练和解码。具体来说：
+
+- 概率计算问题是给定条件随机场 $(\mathbb{y},\mathbb{x})$，输入序列 $\mathbb{x}$ 和输出序列 $\mathbb{y}$，计算条件概率 $P(Y_i=y_i\mid\mathbb{x})$，$P(\mathbb{y}\_{i-1}=y_{i-1},\mathbb{y}_i=y_i\mid\mathbb{x})$ 以及相应的数学期望的问题。像隐马尔可夫模型那样，引进前向-后向向量，递归地计算以上概率和期望值。这样的算法称为前向-后向算法。
+- 参数训练即通过训练数据集估计条件随机场模型参数的问题，称为学习问题。条件随机场模型实际上是定义在时序数据上的对数线形模型，其学习方法包括极大似然估计和正则化的极大似然估计。具体的优化实现算法有改进的迭代尺度法 IIS、梯度下降法以及拟牛顿法。
+- 解码即条件随机场的预测问题，给定条件随机场 $(\mathbb{y},\mathbb{x})$ 和输入序列（观测序列）$\mathbb{x}$，求条件概率最大的输出序列（标记序列）$\mathbb{y}^*$，即对观测序列进行标注。与隐马尔可夫模型类似，条件随机场的预测算法也是 Viterbi 算法。
+
+相对于 HMM 隐马尔可夫模型，CRF 条件随机场的主要优点在于它的条件随机性，只需考虑当前已经出现的观测状态的特性，没有独立性的严格要求，对于整个序列内部的信息和外部观测信息均可有效利用，避免了 MEMM 最大熵马尔可夫模型和其他针对线性序列模型的条件马尔可夫模型会出现的标识偏置问题。
+
+### 使用 Viterbi 算法预测标记序列
+
+正如之前所说，条件随机场的简化形式为 $P_\mathbb{w}(\mathbb{y}\mid\mathbb{x})$，我们现在就是要在给定观测序列 $\mathbb{x}$ 的情况下，求条件概率最大的标记序列 $\mathbb{y}^*$，即：
+
+$$\begin{align}\mathbb{y}^*&=\arg\max_\mathbb{y}P_\mathbb{w}(\mathbb{y}\mid\mathbb{x})\\&=\arg\max_\mathbb{y}\frac{\exp(\mathbb{w}\cdot F(\mathbb{y},\mathbb{x}))}{Z}\\&=\arg\max_\mathbb{y}\exp(\mathbb{w}\cdot F(\mathbb{y},\mathbb{x}))\\&=\arg\max_\mathbb{y}(\mathbb{w}\cdot F(\mathbb{y},\mathbb{x}))\end{align}$$
+
+于是，条件随机场的预测问题成为求非规范化概率最大的最优路径问题，这时只需要计算非规范化概率，可以大大提高效率：
+
+$$\begin{gather}\max_\mathbb{y}(\mathbb{w}\cdot F(\mathbb{y},\mathbb{x}))=\max_\mathbb{y}(\mathbb{w}\cdot(f_1(\mathbb{y},\mathbb{x}),f_2(\mathbb{y},\mathbb{x}),\cdots,f_M(\mathbb{y},\mathbb{x}))^T)\\=\max_\mathbb{y}(\mathbb{w}\cdot(\sum_{i=1}^nf_1(y_{i-1},y_i,\mathbb{x},i),\sum_{i=1}^nf_2(y_{i-1},y_i,\mathbb{x},i),\cdots,\sum_{i=1}^nf_M(y_{i-1},y_i,\mathbb{x},i)))\\=\max_\mathbb{y}\sum_{i=1}^n\mathbb{w}\cdot(f_1(y_{i-1},y_i,\mathbb{x},i),f_2(y_{i-1},y_i,\mathbb{x},i),\cdots,f_M(y_{i-1},y_i,\mathbb{x},i))^T\end{gather}$$
+
+我们令区部特征向量为：
+
+$$F_i(y_{i-1},y_i,\mathbb{x})=(f_1(y_{i-1},y_i,\mathbb{x},i),f_2(y_{i-1},y_i,\mathbb{x},i),\cdots,f_M(y_{i-1},y_i,\mathbb{x},i))^T$$
+
+上式就可以简写成
+
+$$\max_\mathbb{y}\sum_{i=1}^n\mathbb{w}\cdot F_i(y_{i-1},y_i,\mathbb{x})$$
+
+#### 使用 Viterbi 算法
+
+首先求出位置 1 的各个标记 $j=1,2,\cdots,m$ 的非规范化概率：
+
+$$\delta_1(j)=\mathbb{w}\cdot F_1(y_0=start,y_1=j,\mathbb{x}),\quad j=1,2,\cdots,m$$
+
+一般地，由递推公式，求出到位置 $i$ 的各个标记 $l = 1,2,\cdots,m$ 的非规范化概率的最大值，同时记录非规范化概率最大值的路径：
+
+$$\delta_i(l)=\max_{l\le j\le m}\{\delta_{i-1}(j)+\mathbb{w}\cdot F_i(y_{i-1}=j,y_i=l,\mathbb{x})\},\quad l=1,2,\cdots,m$$
+
+$$\Psi_i(l)=\arg\max_{1\le j \le m}\{\delta_{i-1}(j)+\mathbb{w}\cdot F_i(y_{i-1}=j,y_i=l,\mathbb{x})\},\quad l=1,2,\cdots,m$$
+
+直到 $i=n$ 时终止。这时求得非规范化概率的最大值为 $\max_y(\mathbb{w}\cdot F(\mathbb{y},\mathbb{x}))=\max_{1\le j \le m}\delta_n(j)$，以及最优路径的终点 $y_n^\*=\arg\max_{1\le j \le m}\delta_n(j)$，由此最优路径终点回溯得到最优路径 $y^\*=(y_1^\*,y_2^\*,\cdots,y_n^\*)^T$。
+
+#### 一个简单的例子
+
+设有一标注问题：输入观测序列为 $\mathbb{x}=(x_1,x_2,x_3)$，输出标记序列为 $\mathbb{y}=(y_1,y_2,y_3)$，$y_1,y_2,y_3$ 取值为 $\{1,2\}$。
+
+假设特征函数 $t_j$，$s_k$ 和对应的权值 $\lambda_j$，$\mu_k$ 如下：
+
+$$\begin{align}t_1&=t_1(y_{i-1}=1,y_i=2,\mathbb{x},i),\quad i=2,3,\quad\lambda_1=1\\t_2&=t_2(y_1=1,y_2=1,\mathbb{x},2),\quad\lambda_2=0.6\\t_3&=t_3(y_2=2,y_3=1,\mathbb{x},3),\quad\lambda_3=1\\t_4&=t_4(y_1=2,y_2=1,\mathbb{x},2),\quad\lambda_4=1\\t_5&=t_5(y_2=2,y_3=2,\mathbb{x},3),\quad\lambda_5=0.2\\\\s_1&=s_1(y_1=1,\mathbb{x},1),\quad\mu_1=1\\s_2&=s_2(y_i=2,\mathbb{x},i),\quad i=1,2\quad\mu_2=0.5\\s_3&=s_3(y_i=1,\mathbb{x},i),\quad i=2,3\quad\mu_3=0.8\\s_4&=s_4(y_3=2,\mathbb{x},3),\quad\mu_4=0.5\end{align}$$
+
+以 $t_1$ 为例，其他特征函数类似：
+
+$$t_1(y_{i-1},y_i,\mathbb{x},i)=\begin{cases}1,&y_{i-1}=1,y_i=2,\mathbb{x},i,(i=2,3)\\0,&其他\end{cases}$$
+
+现在利用维特比算法求解最可能的标记序列：
+
+1. 初始化
+
+   $i=1$：$\delta_1(j)=\mathbb{w}\cdot F_1(y_0=start,y_1=j,\mathbb{x}),\quad j=1,2$
+
+   $$\delta_1(1)=\mu_1s_1=1,\quad\delta_1(2)=\mu_2s_2=0.5$$
+
+2. 递推
+
+   $i=2$：$\delta_2(l)=\max_j\{\delta_1(j)+\mathbb{w}\cdot F_2(j,l,\mathbb{x})\}$
+
+   $$\begin{align}\delta_2(1)&=\max\{\delta_1(1)+\mathbb{w}\cdot F_2(y_1=1,y_2=1,\mathbb{x}),\delta_1(2)+\mathbb{w}\cdot F_2(y_1=2,y_2=1,\mathbb{x})\}\\&=\max\{1+\lambda_2t_2+\mu_3s_3,0.5+\lambda_4t_4+\mu_3s_3\}=2.4,\quad\Psi_2(1)=1\end{align}$$
+
+   $$\begin{align}\delta_2(2)&=\max\{\delta_1(1)+\mathbb{w}\cdot F_2(y_1=1,y_2=2,\mathbb{x}),\delta_1(2)+\mathbb{w}\cdot F_2(y_1=2,y_2=2,\mathbb{x})\}\\&=\max\{1+\lambda_1t_1+\mu_2s_2,0.5+\mu_2s_2\}=2.5,\quad\Psi_2(2)=1\end{align}$$
+
+   $i=3$：$\delta_3(l)=\max_j\{\delta_2(j)+\mathbb{w}\cdot F_3(j,l,\mathbb{x})\}$
+
+   $$\begin{align}\delta_3(1)&=\max\{\delta_2(1)+\mathbb{w}\cdot F_3(y_2=1,y_3=1,\mathbb{x}),\delta_2(2)+\mathbb{w}\cdot F_3(y_2=2,y_3=1,\mathbb{x})\}\\&=\max\{2.4+\mu_3s_3,2.5+\lambda_3t_3+\mu_3s_3\}=4.3,\quad\Psi_3(1)=2\end{align}$$
+
+   $$\begin{align}\delta_3(2)&=\max\{\delta_2(1)+\mathbb{w}\cdot F_3(y_2=1,y_3=2,\mathbb{x}),\delta_2(2)+\mathbb{w}\cdot F_3(y_2=2,y_3=2,\mathbb{x})\}\\&=\max\{2.4+\mu_4s_4,2.5+\lambda_5t_5+\mu_4s_4\}=3.9,\quad\Psi_3(2)=1\end{align}$$
+
+3. 终止
+
+   $$\max_y(\mathbb{w}\cdot F(\mathbb{y},\mathbb{x}))=\max\delta_3(l)=\delta_3(1)=4.3$$
+
+   $$y_3^*=\arg\max_l\delta_3(l)=1$$
+
+4. 返回
+
+   $$\begin{gather}y_2^*=\Psi_3(y_3^*)=\Psi_3(1)=2\\y_1^*=\Psi_2(y_2^*)=\Psi_2(2)=1\end{gather}$$
+
+所以最优标记序列为 $y^\*=(y_1^\*,y_2^\*,y_3^\*)=(1,2,1)$。
+
+### 可以使用的工具
+
+- [CRF++](https://taku910.github.io/crfpp/)(C++)
+- [CRFSuite](http://www.chokkan.org/software/crfsuite/)(C语言)
+- [MALLET](http://mallet.cs.umass.edu/)(Java)，通用的自然语言处理工具包，包括分类、序列标注等。
+- [NLTK](http://www.nltk.org/)(Python)，通用的自然语言处理工具包
+
+### 参考
+
+李航《统计学习方法》  
+周志华《机器学习》  
+宗成庆《统计自然语言处理》

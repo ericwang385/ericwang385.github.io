@@ -1,0 +1,117 @@
+---
+layout:     post
+title:      "拉格朗日对偶性"
+subtitle:   "求解约束最优化问题"
+date:       2017-05-01 12:00:00
+author:     "Xiaosheng"
+header-img: "img/bg/bg_article_34.jpg"
+catalog:	true
+tags:
+    - 机器学习
+---
+
+在约束最优化问题中，常常利用拉格朗日对偶性(Lagrange duality)将原始问题转换为对偶问题，通过求解对偶问题而得到原始问题的解。下面简要叙述拉格朗日对偶性的主要概念和结果。
+
+> 在许多机器学习方法中都采用了将原问题化为对偶问题来求解的方法，例如最大熵模型、支持向量机等。
+
+### 1. 使用拉格朗日函数转换约束最优化问题
+
+#### 1.1 原始问题
+
+假设 $f(\boldsymbol{x})$，$c_i(\boldsymbol{x})$，$h_j(\boldsymbol{x})$ 是定义在 $\mathbf{R}^n$ 上的连续可微函数。我们需要求解约束最优化问题：
+
+$$\min_{\boldsymbol{x} \in \mathbf{R}^n}f(\boldsymbol{x})$$
+
+$$\begin{align}\mathbb{s.t.}\quad &c_i(\boldsymbol{x}) \le 0,\quad i=1,2,\cdots,k\\&h_j(\boldsymbol{x})=0,\quad j=1,2,\cdots,l\end{align}$$
+
+我们称此约束最优化问题为原始最优化问题或原始问题。
+
+#### 1.2 引入广义拉格朗日函数
+
+为了求解原始问题，我们首先引入广义拉格朗日函数(generalized Lagrange function)，：
+
+$$L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})=f(\boldsymbol{x})+\sum_{i=1}^k \alpha_ic_i(\boldsymbol{x}) + \sum_{j=1}^l\beta_jh_j(\boldsymbol{x})$$
+
+其中，$\boldsymbol{x}=(x_1,x_2,\cdots,x_n)^T \in \mathbf{R}^n$，$\alpha_i$ 和 $\beta_j$ 是拉格朗日乘子，$\alpha_i \ge 0$，考虑 $\boldsymbol{x}$ 的函数：
+
+$$\theta(\boldsymbol{x})=\max_{\boldsymbol{\alpha,\beta}:\alpha_i\ge0}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})$$
+
+我们可以证明，如果 $\boldsymbol{x}$ 满足原始问题中约束，那么 $\theta(\boldsymbol{x})=f(\boldsymbol{x})$。如果 $\boldsymbol{x}$ 不满足原始问题中的约束，那么 $\theta(\boldsymbol{x})=+\infty$。即：
+
+$$\theta(\boldsymbol{x})=\begin{cases}f(\boldsymbol{x}),&\boldsymbol{x} 满足原始问题约束\\+\infty,&其他\end{cases}$$
+
+> **不满足原始问题约束的情况**
+>
+> 假设某个 $\boldsymbol{x}$ 不满足原始问题的约束条件，即存在某个 $i$ 使得 $c_i(\boldsymbol{x})\gt0$ 或者存在某个 $j$ 使得 $h_j(\boldsymbol{x})=0$，那么就有：
+>
+> $$\theta(\boldsymbol{x})=\max_{\boldsymbol{\alpha,\beta}:\alpha_i\ge0}\Bigg[f(\boldsymbol{x})+\sum_{i=1}^k \alpha_ic_i(\boldsymbol{x}) + \sum_{j=1}^l\beta_jh_j(\boldsymbol{x})\Bigg]=+\infty$$
+>
+> 因为若某个 $i$ 使约束 $c_i(\boldsymbol{x})\gt0$，则可令 $\alpha_i\rightarrow+\infty$；若某个 $j$ 使 $h_j(\boldsymbol{x})\neq0$，则可令 $\beta_j$ 使 $\beta_jh_j(\boldsymbol{x})\rightarrow+\infty$，而将其余各 $\alpha_i$，$\beta_j$ 均取为 $0$。
+
+#### 1.3 广义拉格朗日函数的极小极大问题 
+
+所以如果考虑极小化问题：
+
+$$\min_{\boldsymbol{x}}\theta(\boldsymbol{x})=\min_{\boldsymbol{x}}\max_{\boldsymbol{\alpha,\beta}:\alpha_i\ge0}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})$$
+
+就会发现它是与原始最优化问题等价的，即它们有相同的解。$\min_{\boldsymbol{x}}\max_{\boldsymbol{\alpha,\beta}:\alpha_i\ge0}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})$ 称为广义拉格朗日函数的极小极大问题。这样一来，就把原始最优化问题表示为广义拉格朗日函数的极小极大问题。
+
+### 2. 利用拉格朗日对偶性进一步表示为约束最优化问题 
+
+#### 2.1 原始问题的对偶问题
+
+利用拉格朗日对偶性，我们可以交换之前式子中的 $\max$ 和 $\min$，即问题变成求解 $\max_{\boldsymbol{\alpha,\beta}:\boldsymbol{\alpha_i\ge0}}\min_{\boldsymbol{x}}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})$。这样可以将广义拉格朗日函数的极小极大问题进一步表示为约束最优化问题：
+
+$$\max_{\boldsymbol{\alpha,\beta}}\min_{\boldsymbol{x}}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})$$
+
+$$\mathbb{s.t.}\quad\alpha_i\ge0,\quad i=1,2,\cdots,k$$
+
+我们将上面的问题称为原始问题的对偶问题。
+
+#### 2.2 原始问题和对偶问题的关系
+
+若原始问题和对偶问题都有最优值，那么
+
+$$\max_{\boldsymbol{\alpha,\beta}}\min_{\boldsymbol{x}}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})\le\min_{\boldsymbol{x}}\max_{\boldsymbol{\alpha,\beta}:\alpha_i\ge0}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})$$
+
+> **证明**
+>
+> 对任意的 $\alpha$，$\beta$ 和 $\boldsymbol{x}$，有：
+>
+> $$\min_{\boldsymbol{x}}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})\le L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})\le \max_{\boldsymbol{\alpha,\beta}:\alpha_i\ge0}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})$$
+>
+> 由于原始问题和对偶问题均有最优值，所以：
+>
+> $$\min_{\boldsymbol{x}}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})\le \max_{\boldsymbol{\alpha,\beta}:\alpha_i\ge0}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})$$
+>
+> 即：
+>
+> $$\max_{\boldsymbol{\alpha,\beta}}\min_{\boldsymbol{x}}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})\le\min_{\boldsymbol{x}}\max_{\boldsymbol{\alpha,\beta}:\alpha_i\ge0}L(\boldsymbol{x},\boldsymbol{\alpha},\boldsymbol{\beta})$$
+
+#### 2.3 KKT 条件
+
+对原始问题和对偶问题，假设函数 $f(\boldsymbol{x})$ 和 $c_i(\boldsymbol{x})$ 是凸函数，$h_j(\boldsymbol{x})$ 是仿射函数，并且不等式约束 $c_i(\boldsymbol{x})$ 是严格可行的，则 $\boldsymbol{x}^\*$ 和 $\boldsymbol{\alpha}^\*$，$\boldsymbol{\beta}^\*$ 分别是原始问题和对偶问题的解的充要条件是 $\boldsymbol{x}^\*$，$\boldsymbol{\alpha}^\*$，$\boldsymbol{\beta}^\*$ 满足下面的 Karush-Kuhn-Tucker(KKT)条件：
+
+$$\nabla_\boldsymbol{x}L(\boldsymbol{x}^*,\boldsymbol{\alpha}^*,\boldsymbol{\beta}^*)=0$$
+
+$$\nabla_\boldsymbol{\alpha}L(\boldsymbol{x}^*,\boldsymbol{\alpha}^*,\boldsymbol{\beta}^*)=0$$
+
+$$\nabla_\boldsymbol{\beta}L(\boldsymbol{x}^*,\boldsymbol{\alpha}^*,\boldsymbol{\beta}^*)=0$$
+
+$$\alpha_i^*c_i(\boldsymbol{x}^*)=0,\quad i=1,2,\cdots,k$$
+
+$$c_i(\boldsymbol{x}^*)\le0,\quad i=1,2,\cdots,k$$
+
+$$\alpha_i^*\ge0,\quad i=1,2,\cdots,k$$
+
+$$h_j(\boldsymbol{x}^*)=0,\quad j=1,2,\cdots,l$$
+
+> **仿射函数**
+>
+> $$f(\boldsymbol{x})=\boldsymbol{A}\boldsymbol{x}+b$$
+>
+> 仿射函数就是一个线性函数，其输入是 $n$ 维向量，参数 $\boldsymbol{A}$ 可以是常数，也可以是 $m \times n$ 的矩阵，$b$可以是常数，也可以是 $m$ 维的列向量，输出是一个 $m$ 维的列向量。在几何上，仿射函数是一个线性空间到另一个线性空间的变换。
+
+### 参考
+
+李航《统计学习方法》

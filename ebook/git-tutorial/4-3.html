@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<link rel="stylesheet" type="text/css" href="stylesheets/xspost.css" media="screen">
+	<title>管理修改 - Git 教程</title>
+</head>
+<body>
+
+	<h3>
+		<a href="index.html">Git 教程</a>
+		>
+		<a href="menu.html">目录</a>
+		>
+	</h3>
+
+	<h1>管理修改</h1>
+
+	<hr />
+
+	<p>
+		现在，假定你已经完全掌握了暂存区的概念。下面，我们要讨论的就是，为什么 Git 比其他版本控制系统设计得优秀，因为 Git 跟踪并管理的是修改，而非文件。
+	</p>
+
+	<p>
+		你会问，什么是修改？比如你新增了一行，这就是一个修改，删除了一行，也是一个修改，更改了某些字符，也是一个修改，删了一些又加了一些，也是一个修改，甚至创建一个新文件，也算一个修改。
+	</p>
+
+	<p>
+		为什么说 Git 管理的是修改，而不是文件呢？我们还是做实验。第一步，对 readme.txt 做一个修改，比如加一行内容：
+	</p>
+
+	<pre><code>$ cat readme.txt
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes.
+</code></pre>
+
+	<p>然后，添加：</p>
+
+	<pre><code>$ git add readme.txt
+$ git status
+# On branch master
+# Changes to be committed:
+#   (use "git reset HEAD &lt;file&gt;..." to unstage)
+#
+#       modified:   readme.txt
+#
+</code></pre>
+
+	<p>然后，再修改 readme.txt：</p>
+
+	<pre><code>$ cat readme.txt 
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+</code></pre>
+
+	<p>提交：</p>
+
+	<pre><code>$ git commit -m "git tracks changes"
+[master d4f25b6] git tracks changes
+ 1 file changed, 1 insertion(+)
+</code></pre>
+
+	<p>提交后，再看看状态：</p>
+
+	<pre><code>$ git status
+# On branch master
+# Changes not staged for commit:
+#   (use "git add &lt;file&gt;..." to update what will be committed)
+#   (use "git checkout -- &lt;file&gt;..." to discard changes in working directory)
+#
+#       modified:   readme.txt
+#
+no changes added to commit (use "git add" and/or "git commit -a")
+</code></pre>
+
+	<p>咦，怎么第二次的修改没有被提交？</p>
+
+	<p>别激动，我们回顾一下操作过程：</p>
+
+	<p>
+		第一次修改 ->
+		<code>git add</code>
+		-> 第二次修改 ->
+		<code>git commit</code>
+	</p>
+
+	<p>
+		你看，我们前面讲了，Git 管理的是修改，当你用
+		<code>git add</code>
+		命令后，在工作区的第一次修改被放入暂存区，准备提交，但是，在工作区的第二次修改并没有放入暂存区，所以，
+		<code>git commit</code>
+		只负责把暂存区的修改提交了，也就是第一次的修改被提交了，第二次的修改不会被提交。
+	</p>
+
+	<p>
+		提交后，用
+		<code>git diff HEAD — readme.txt</code>
+		命令可以查看工作区和版本库里面最新版本的区别：
+	</p>
+
+	<pre><code>$ git diff HEAD -- readme.txt 
+diff --git a/readme.txt b/readme.txt
+index 76d770f..a9c5755 100644
+--- a/readme.txt
++++ b/readme.txt
+@@ -1,4 +1,4 @@
+ Git is a distributed version control system.
+ Git is free software distributed under the GPL.
+ Git has a mutable index called stage.
+-Git tracks changes.
++Git tracks changes of files.
+</code></pre>
+
+	<p>可见，第二次修改确实没有被提交。</p>
+
+	<p>
+		那怎么提交第二次修改呢？你可以继续
+		<code>git add</code>
+		再
+		<code>git commit</code>
+		，或者之前先别着急提交第一次修改，等到
+		<code>git add</code>
+		第二次修改后，再
+		<code>git commit</code>
+		，就相当于把两次修改合并后一块提交了：
+	</p>
+
+	<p>
+		第一次修改 ->
+		<code>git add</code>
+		-> 第二次修改 ->
+		<code>git add</code>
+		->
+		<code>git commit</code>
+	</p>
+
+	<p>好，现在，把第二次修改提交了，然后开始小结。</p>
+
+	<h2>小结</h2>
+
+	<p>
+		现在，你又理解了 Git 是如何跟踪修改的，每次修改，如果不
+		<code>add</code>
+		到暂存区，那就不会加入到
+		<code>commit</code>
+		中。
+	</p>
+
+	<br />
+
+	<div align="center">
+		<a href="4-2.html" class="btn-black">上一节</a>
+		<a href="menu.html" class="btn-black">返回目录</a>
+		<a href="4-4.html" class="btn-black">下一节</a>
+	</div>
+
+</body>
+</html>

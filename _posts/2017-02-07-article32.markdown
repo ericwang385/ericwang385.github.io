@@ -1,0 +1,205 @@
+---
+layout:     post
+title:      "程序员的自我修养（三）：fork() 安全"
+subtitle:   "慎重使用多进程和多线程混搭的模型"
+date:       2017-02-07 12:00:00
+author:     "liam0205"
+header-img: "img/bg/bg_article_30.jpg"
+catalog: true
+tags:
+    - IT常识
+---
+
+> 转载自[《程序员的自我修养（三）：fork() 安全
+> 》](http://liam0205.me/2017/01/17/fork-safe/)，版权归 [liam0205](http://liam0205.me/) 所有。
+
+# 程序员的自我修养（三）：fork() 安全
+
+这个系列的文章，已有两篇（[一](http://xiaosheng.me/2017/02/07/article30/)、[二](http://xiaosheng.me/2017/02/07/article31/)）。本文将接着第二篇的叙述，探讨一个与多进程、多线程相关的问题：`fork()` 安全。
+
+## 抛出异常
+
+首先我们来看这样的代码
+
+```c
+// compile: g++ ‐‐std=c++11 ‐lpthread mutex_deadlock.cpp
+// execute: ./a.out
+#include <pthread.h>
+#include <time.h>
+#include <unistd.h>
+
+using namespace std;
+
+void* doit(void*) {
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&mutex);
+    struct timespec ts = {20, 0};
+    nanosleep(&ts, 0);
+    pthread_mutex_unlock(&mutex);
+    return 0;
+}
+
+int main(void) {
+    pthread_t t;
+    pthread_create(&t, nullptr, doit, nullptr);
+
+    if (fork() == 0) {
+        doit(nullptr);
+        return 0;
+    }
+    pthread_join(t, 0);
+
+    return 0;
+}
+```
+
+在代码里，我们首先用 `pthread_create()` 创建了一个子线程。在子线程里，`doit()` 工作函数会持有一把互斥锁，然后睡 20 秒后再释放这把锁。而后，与子线程同时进行的，在主线程中，我们调用 `fork()` 函数，创建一个子进程。并且，在子进程里，我们也调用 `doit()` 函数，尝试获取互斥锁。
+
+## 捕获异常
+
+现在我们观察一下，这个程序的运行状态。
+
+```
+$ ./a.out
+$ ps ‐ef | grep "a.out" | grep ‐v grep
+   16629    10449   340  0 11:25 pts/90   00:00:00 ./a.out
+   16629    10451 10449  0 11:25 pts/90   00:00:00 ./a.out
+```
+
+可以看到，等到我们有机会查看程序的运行状态时，子进程已经被创建出来了。显而易见，`10449` 是主进程，而 `10451` 是子进程。我们用 `strace` 跟踪主进程试试看。
+
+```
+$ strace -p 10449 -f
+Process 10449 attached with 2 threads - interrupt to quit
+[pid 10450] restart_syscall(<... resuming interrupted call ...> <unfinished ...>
+[pid 10449] futex(0x41c279d0, FUTEX_WAIT, 10450, NULL <unfinished ...>
+[pid 10450] <... restart_syscall resumed> ) = 0
+[pid 10450] _exit(0)                    = ?
+Process 10450 detached
+<... futex resumed> )                   = 0
+exit_group(0)                           = ?
+Process 10449 detached
+```
+
+不难发现，`strace` 提示主进程里有 2 个线程，其中主线程正在等待子线程释放互斥锁。待子线程释放互斥锁并退出后，主线程就获取到锁，而后退出了。这表明，主进程运行正常。
+
+现在看看子进程的状态。
+
+```
+$ ps -ef | grep "a.out" | grep -v grep
+16629    10451     1  0 11:25 pts/90   00:00:00 ./a.out
+$ strace -p 10451 -f
+Process 10451 attached - interrupt to quit
+futex(0x600e20, FUTEX_WAIT_PRIVATE, 2, NULL
+```
+
+这里有几处值得注意的地方
+
+- 执行 `ps -ef` 的时候，主进程已经退出了，但是子进程依然存活。这时候，子进程变为孤儿，过继给 1 号进程 `init`。
+- 执行 `strace` 发现，子进程只有一个线程（而不是 2 个线程）。
+- 并且，子进程的线程，在不断尝试获取互斥锁而不得，陷入了死锁状态。
+
+## 异常分析
+
+子进程陷入死锁，因而等主进程退出后就变成孤儿进程。这件事情符合逻辑，不需要做额外的探讨。但是不符合逻辑的地方有两处：
+
+- 主进程显而易见有两个线程，为什么经由其 `fork()` 得到的子进程却只有 1 个线程？
+- 既然子进程只有 1 个线程，为什么会陷入死锁？
+
+为了解答这两个疑惑，我们需要更加深入地了解一下 `fork()` 函数的行为。阅读 [`fork()` 函数的说明](http://man7.org/linux/man-pages/man2/fork.2.html)，我们可以发现有这样一段话：
+
+> The child process is created with a single thread — the one that called `fork()`. The entire virtual address space of the parent is replicated in the child, including the states of mutexes, condition variables, and other pthreads objects; the use of `pthread_atfork()` may be helpful for dealing with problems that this can cause.
+
+翻译过来就是：经由 `fork()` 创建的子进程，其中只有一个线程。**子进程里仅存的线程，对应着主进程里调用 fork() 函数的线程**。此外，主进程的整个虚存空间都被复制到了子进程。因而，**包括互斥锁、条件变量、其余线程的内部对象等，都保持着原样**。由此引发的问题，可以考虑用 `pthread_atfork()` 函数解决。
+
+打住！我们似乎发现了什么……
+
+回过头来看代码。在 `fork()` 执行时，子线程还持有着 `mutex` 互斥锁。而当 `fork()` 执行之后，子进程里的子线程就蒸发掉了，但是 `mutex` 互斥锁依然保持着被持有的状态。而子进程里仅存的线程，马上就进入 `doit()` 函数，尝试获取锁——它在尝试获取一个永远不会被释放的锁，形成死锁。
+
+这是一个刻意构造的例子，说明当子线程持有锁的时候，由主线程进行 `fork()` 操作是不安全的。在生产实际中，这种现象不总是发生，但是在概率的意义上是必然发生的。因此，我们有必要考虑怎样解决这个问题。好在，`fork()` 的文档中给出了提示：使用 `pthread_atfork()` 函数。
+
+## `pthread_atfork()` 函数
+
+`pthread_atfork()` 和 `phread_create()` 函数一样，由 `pthread` 库提供。它的原型是
+
+```c
+int pthread_atfork (void (*prepare) (void), void (*parent) (void), void (*child) (void));
+```
+
+它接收三个参数，分别是
+
+- `prepare`: 将在 `fork()` 之前执行；
+- `parent`: 将在父进程 `fork()` 即将 `return` 的地方执行；
+- `child`: 将在子进程 `fork()` 即将 `return` 的地方执行。
+
+这个函数实际上是一个注册机，它可以被执行多次，而后将诸多 `prepare` 函数压入堆栈中，在 `fork()` 之前依次弹栈执行（执行顺序与注册的顺序相反）；将诸多 `parent` 和 `child` 函数分别填入队列中，在 `fork()`函数即将 `return` 的地方依次执行（执行顺序与注册顺序相同）。按照设计的意图，程序员可以在 `fork()` 之前，做好清理工作，以便 `fork()` 能够安全地调用；并且在 `fork()` 返回之前，对函数做初始化，以便后续代码能够顺利执行。
+
+据此，对上面的代码，我们可以有这样的修改
+
+```c
+// compile: g++ ‐‐std=c++11 ‐lpthread mutex_deadlock_fix.cpp
+// execute: ./a.out
+#include <pthread.h>
+#include <time.h>
+#include <unistd.h>
+
+using namespace std;
+
+void* doit(void*) {
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&mutex);
+    struct timespec ts = {20, 0};
+    nanosleep(&ts, 0);
+    pthread_mutex_unlock(&mutex);
+    return 0;
+}
+
+void prepare(void) {
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&mutex);
+}
+
+void parent(void) {
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_unlock(&mutex);
+}
+
+void child(void) {
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_unlock(&mutex);
+}
+
+int main(void) {
+    pthread_atfork(prepare, parent, child);
+
+    pthread_t t;
+    pthread_create(&t, nullptr, doit, nullptr);
+
+    if (fork() == 0) {
+        doit(nullptr);
+        return 0;
+    }
+    pthread_join(t, 0);
+
+    return 0;
+}
+```
+
+不难验证，死锁的问题已经解决。
+
+## 没有银弹
+
+不幸的是，`pthread_atfork()` 函数并不是解决此类问题的银弹。事实上，`pthread_atfork()` 本身就可能造成死锁的问题。
+
+实际上，因为库作者不可能知道其它第三方库对锁的使用，因此每个库必须自己调用 `pthread_atfork()` 来处理自己的环境。然而，在实际环境中，各个 `pthread_atfork()` 函数调用的时机是不确定的；也因此，各个 `prepare` 函数的调用顺序是不确定的。这有可能会造成问题，例如可能有下面的情况发生
+
+- Thread 1 调用 `fork()` 函数。
+- Thread 1 执行 `libc` 中注册的 `prepare` 函数，获取 `libc` 中的 `mutex`。
+- Thread 2 中，第三方库 A 获取了它自己的互斥锁 `AM`；接下来 Thread 2 尝试获取 `libc` 的 `mutex` 以便继续清理环境；而此时 `mutex` 已经在 Thread 1 中被持有，因此 Thread 2 进入等待状态。
+- Thread 1 现在尝试清理第三方库 A 的环境，于是它要去获取 `AM`；然而 `AM` 在 Thread 2 手里，于是 Thread 1 进入等待状态。
+- 产生死锁。
+
+这件事情的不可解之处在于，死锁的产生和程序员自身的编码没有任何关系：使用任何第三方库，在多线程的环境下执行 `fork()`，都可能死锁。由此，我们得出结论：**在多线程环境下，执行 fork() 函数是不安全的**。也因此，必须**慎重使用多进程和多线程混搭的模型**。
+
+> 转载自[《程序员的自我修养（三）：fork() 安全
+> 》](http://liam0205.me/2017/01/17/fork-safe/)，版权归 [liam0205](http://liam0205.me/) 所有。

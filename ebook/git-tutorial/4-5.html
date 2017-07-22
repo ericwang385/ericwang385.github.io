@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<link rel="stylesheet" type="text/css" href="stylesheets/xspost.css" media="screen">
+	<title>删除文件 - Git 教程</title>
+</head>
+<body>
+
+	<h3>
+		<a href="index.html">Git 教程</a>
+		>
+		<a href="menu.html">目录</a>
+		>
+	</h3>
+
+	<h1>删除文件</h1>
+
+	<p>在 Git 中，删除也是一个修改操作，我们实战一下，先添加一个新文件 test.txt 到 Git 并且提交：</p>
+
+	<pre><code>$ git add test.txt
+$ git commit -m "add test.txt"
+[master 94cdc44] add test.txt
+ 1 file changed, 1 insertion(+)
+ create mode 100644 test.txt
+</code></pre>
+
+	<p>
+		一般情况下，你通常直接在文件管理器中把没用的文件删了，或者用
+		<code>rm</code>
+		命令删了：
+	</p>
+
+	<pre><code>$ rm test.txt</code></pre>
+
+	<p>
+		这个时候，Git 知道你删除了文件，因此，工作区和版本库就不一致了，
+		<code>git status</code>
+		命令会立刻告诉你哪些文件被删除了：
+	</p>
+
+	<pre><code>$ git status
+# On branch master
+# Changes not staged for commit:
+#   (use "git add/rm &lt;file&gt;..." to update what will be committed)
+#   (use "git checkout -- &lt;file&gt;..." to discard changes in working directory)
+#
+#       deleted:    test.txt
+#
+no changes added to commit (use "git add" and/or "git commit -a")
+</code></pre>
+
+	<p>
+		现在你有两个选择，一是确实要从版本库中删除该文件，那就用命令
+		<code>git rm</code>
+		删掉，并且
+		<code>git commit</code>
+		：
+	</p>
+
+	<pre><code>$ git rm test.txt
+rm 'test.txt'
+$ git commit -m "remove test.txt"
+[master d17efd8] remove test.txt
+ 1 file changed, 1 deletion(-)
+ delete mode 100644 test.txt
+</code></pre>
+
+	<p>现在，文件就从版本库中被删除了。</p>
+
+	<p>另一种情况是删错了，因为版本库里还有呢，所以可以很轻松地把误删的文件恢复到最新版本：</p>
+
+	<pre><code>$ git checkout -- test.txt</code></pre>
+
+	<p>
+		<code>git checkout</code>
+		其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
+	</p>
+
+	<h2>小结</h2>
+
+	<p>
+		命令
+		<code>git rm</code>
+		用于删除一个文件。如果一个文件已经被提交到版本库，那么你永远不用担心误删，但是要小心，你只能恢复文件到最新版本，你会丢失 <strong>最近一次提交后你修改的内容</strong>
+		。
+	</p>
+
+	<br />
+
+	<div align="center">
+		<a href="4-4.html" class="btn-black">上一节</a>
+		<a href="menu.html" class="btn-black">返回目录</a>
+		<a href="5-0.html" class="btn-black">下一节</a>
+	</div>
+
+</body>
+</html>
