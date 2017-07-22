@@ -18,7 +18,7 @@ tags:
 这篇文章里会初步介绍一下opencv在多个平台下下载安装以及环境的配置
 
   
-## OpenCV的安装
+## OpenCV c/c++的安装
 
 ### Windows平台下
 
@@ -31,5 +31,115 @@ OpenCV在macOS下 (笔者是Sierra 10.12.5 版本)有两种方式可供下载：
 -  直接下载<a herf="http://opencv.org/releases.html">OpenCV 3.2.0 </a>下载完后双击安装即可
 
 - 利用Homebrew包管理器<br>如果你还没有安装Homebrew可以前往<a herf =https://brew.sh/>brew.sh</a>安装<br>
+安装完之后直接输入命令
 
-   
+```bash
+brew update
+brew tap homebrew/science
+brew install cmake
+brew install opencv  #opencv2.x Homebrew提供的这个版本据说有bug来着
+brew install opencv3 #opencv3.x 
+```
+这个方法还是非常傻瓜的，安装之后所有的文件都会在<code>/usr/local/Cellar</code>文件夹下（这个路径很重要=。=配编译环境要用）
+
+## OpenCV c/c++的环境配置
+
+### Xcode配置(8.2.1)
+
+1. 添加lib文件查找支持: 修改工程Build Settings下Library Search Paths为<code>/user/local/lib</code>
+2. 添加头文件: 修改工程Build Settings下Search Path中的Header Search Paths为<code>/user/local/include</code>与<code>/usr/local/include/opencv</code>
+3. 添加.dylib文件: 跳转到<code>/usr/local/lib</code>将其中所有opencv相关的.dylib都直接加入到工程文件中（或右键点击项目名选择“add files to进入后按 ／ 跳出go to the folder 再输入  /usr/local/lib”）
+
+![1](/img/2017-7-23/xcode.png)
+
+然后就可以愉快的开始敲代码啦(´▽｀)
+
+### Clion配置
+
+1. 创建一个Clion项目名为“opencv_test”
+2. 打开其中<code>CMakeLists.txt</code>输入：
+```cmake
+cmake_minimum_required(VERSION 3.7)
+project(opencv_test)
+
+set(OpenCV_DIR /usr/local/Cellar/opencv3/3.2.0/share/OpenCV)#这是我的路径如果有不一样的话记得改成自己的
+
+find_package(OpenCV REQUIRED)
+
+set(CMAKE_CXX_STANDARD 11)
+set(SOURCE_FILES main.cpp)
+add_executable(opencv_test ${SOURCE_FILES})
+
+target_link_libraries(opencv_test ${OpenCV_LIBS})
+```
+![2](/img/2017-7-23/cmake.png)
+
+然后也可以愉快的开始敲代码啦(´▽｀)
+
+
+### 实例代码
+这里给出一个实例代码，复制粘贴一下就能用啦(图片路径填自己的咯)(´▽｀)
+
+**c++**
+
+```c++
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <iostream>
+#include <string>
+
+using namespace cv;
+using namespace std;
+
+int main( int argc, char** argv )
+
+{
+    string imageName("这里填你要显示的图片所在的路径"); 
+    if( argc > 1)
+    {
+        imageName = argv[1];
+    }
+    Mat image;
+    image = imread(imageName.c_str(), IMREAD_COLOR); // Read the file
+    if( image.empty() )    // Check for invalid input
+    {
+        cout <<  "Could not open or find the image" << std::endl ;
+        return -1;
+    }
+    namedWindow( "Display window", WINDOW_AUTOSIZE ); // Create a window for display.
+    imshow( "Display window", image );                // Show our image inside it.
+    waitKey(0); // Wait for a keystroke in the window
+    
+    return 0;
+    
+}
+```
+
+## OpenCV Python的安装及环境配置 
+
+如果你是一个用Python做OpenCV的开发者，那么当我前面都在放屁=。=正文从这里开始
+
+首先默认你已成功安装Python3.5或以上版本以及相应的pip且已安装Xcode(如果没有还不快去装 超凶.jpg)
+
+打开Terminal安装Apple Command Line Tools
+```bash
+$ sudo xcodebuild -license
+$ sudo xcode-select --install
+```
+再安装Python-OpenCV的依赖包
+```bash
+$ pip install numpy
+```
+安装OpenCV
+```bash
+$ brew install opencv3 --with-contrib --with-python3 --HEAD
+```
+
+然后就安好啦(´▽｀)
+
+进Python环境输入
+```python
+import cv2
+```
+没报错的话就是成功啦
