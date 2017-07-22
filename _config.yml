@@ -46,7 +46,7 @@ ba_track_id: b576afa48b7cd942e1a8c455b0d75234
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "一直什么都想学的蠢鸭子"
+sidebar-about-description: "一只什么都想学的蠢鸭子"
 sidebar-avatar: /img/face.jpeg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
