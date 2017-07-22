@@ -58,7 +58,7 @@ brew install opencv3 #opencv3.x
 
 1. 创建一个Clion项目名为“opencv_test”
 2. 打开其中<code>CMakeLists.txt</code>输入：
-```cmake
+```makefile
 cmake_minimum_required(VERSION 3.7)
 project(opencv_test)
 
