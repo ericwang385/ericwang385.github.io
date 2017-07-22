@@ -18,13 +18,13 @@ tags:
 这篇文章里会初步介绍一下opencv在多个平台下下载安装以及环境的配置
 
   
-##OpenCV的安装
+## OpenCV的安装
 
-###Windows平台下
+### Windows平台下
 
 OpenCV在Windows平台下可以在<a herf="https://sourceforge.net/projects/opencvlibrary/">这里</a>直接下载OpenCV 3.2.0 版本更多历史版本可以在<a herf="http://opencv.org/releases.html">这里</a>选择下载，这种方式很傻瓜，下载好后直接双击安装即可。安装过程中勾选“Add OpenCV to system PATH for all users”选项。（当然也可以安装完毕添加，在环境变量path中添加“<安装路径>/opencv/bin/”） 
 
-###macOS平台下
+### macOS平台下
 
 OpenCV在macOS下 (笔者是Sierra 10.12.5 版本)有两种方式可供下载：
 
