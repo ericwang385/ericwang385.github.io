@@ -42,7 +42,7 @@ bd_share: true                          # whether or not using baidu share
 
 # Analytics settings
 # Baidu Analytics
-ba_track_id: 07529a93af5fa9f808261a1318c3aba4
+ba_track_id: b576afa48b7cd942e1a8c455b0d75234
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
