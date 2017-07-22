@@ -1,5 +1,5 @@
 # Site settings
-title: 一只蠢鸭子的博客
+title: Eric wang
 SEOTitle: psyduck's blog
 header-img: img/Mono Wall.jpg
 email: eric.w385@163.com
@@ -46,7 +46,7 @@ ba_track_id: 07529a93af5fa9f808261a1318c3aba4
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "专注IT，乐于分享。"
+sidebar-about-description: "一直什么都想学的蠢鸭子"
 sidebar-avatar: /img/face.jpeg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
