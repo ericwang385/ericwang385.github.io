@@ -1,8 +1,7 @@
 ---
-title: Tags
+title: 标签
 layout: default
-description: keep hungry keep foolish
-header-img: "img/tag-bg.jpg"
+header-img: "img/bg/bg_tag.jpg"
 ---
 
 <!-- Page Header -->
@@ -37,11 +36,7 @@ header-img: "img/tag-bg.jpg"
                     <span class="tag-text">{{ tag[0] }}</span>
                 </span>
 				{% for post in tag[1] %}
-				  <!-- <li class="listing-item">
-				  <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
-				  <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
-				  </li> -->
-				 <div class="post-preview">
+				<div class="post-preview">
 				    <a href="{{ post.url | prepend: site.baseurl }}">
 				        <h2 class="post-title">
                             {{ post.title }}
@@ -52,7 +47,6 @@ header-img: "img/tag-bg.jpg"
 				        </h3>
 				        {% endif %}
 				    </a>
-				    <!-- <p class="post-meta">{{ post.date | date:"%Y-%m-%d" }}</p> -->
 				</div>
 				<hr>
 				{% endfor %}
