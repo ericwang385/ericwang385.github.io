@@ -1,0 +1,11 @@
+---
+layout:     post
+title:      "psyduck的opencv之路(一)"
+subtitle:   "opencv环境配置"
+date:       2017-07-22 18:03:00
+author:     "Psyduck"
+header-img: "img/bg/passage(1).jpg"
+catalog: true
+tags:
+    - opencv
+---
