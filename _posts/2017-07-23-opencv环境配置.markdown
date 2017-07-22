@@ -4,8 +4,32 @@ title:      "psyduck的opencv之路(一)"
 subtitle:   "opencv环境配置"
 date:       2017-07-22 18:03:00
 author:     "Psyduck"
-header-img: "img/bg/passage(1).jpg"
+header-img: "img/2017-7-23/header.jpg"
 catalog: true
 tags:
-    - opencv
+    - OpenCV
 ---
+
+<a href="https://baike.baidu.com/item/opencv/10320623?fr=aladdin">OpenCV</a>
+(open source computer vision library)是一个非常强大的跨平台、多语言的计算机视觉库，大一的时候做项目入了坑没想到越走越远23333
+
+然而函数库虽然好用但不会配环境不就非常的绝望了么【摊手】
+
+这篇文章里会初步介绍一下opencv在多个平台下下载安装以及环境的配置
+
+  
+## OpenCV的安装
+
+<h2>Windows平台下</h2>
+
+OpenCV在Windows平台下可以在<a herf="https://sourceforge.net/projects/opencvlibrary/">这里</a>直接下载OpenCV 3.2.0 版本更多历史版本可以在<a herf="http://opencv.org/releases.html">这里</a>选择下载，这种方式很傻瓜，下载好后直接双击安装即可。安装过程中勾选“Add OpenCV to system PATH for all users”选项。（当然也可以安装完毕添加，在环境变量path中添加“<安装路径>/opencv/bin/”） 
+
+<h2>macOS 下</h2>
+
+OpenCV在macOS下 (笔者是Sierra 10.12.5 版本)有两种方式可供下载：
+
+-  直接下载<a herf="http://opencv.org/releases.html">OpenCV 3.2.0 </a>下载完后双击安装即可
+
+- 利用Homebrew包管理器<br>如果你还没有安装Homebrew可以前往<a herf =https://brew.sh/>brew.sh</a>安装<br>
+
+   
