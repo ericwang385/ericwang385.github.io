@@ -1,17 +1,17 @@
 # Site settings
-title: Xs-Huxblog
-SEOTitle: Xs-HuxBlog
+title: 一只蠢鸭子的博客
+SEOTitle: psyduck's blog
 header-img: img/bg/bg_index.jpg
-email: jsksxs360@163.com
+email: eric.w385@163.com
 description: ""
 keyword: ""
-url: "http://jsksxs360.github.io"              # your host, for absolute URL
+url: "http://ericwang385.github.io"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
 # SNS settings
-weibo_username: jsksxs360
-zhihu_username: jsksxs360
-github_username: jsksxs360
+#weibo_username: jsksxs360
+zhihu_username: Eric Wang
+github_username: ericwang385
 
 # Build settings
 # from 2016, 'pygments' is unsupported on GitHub Pages. Use 'rouge' for highlighting instead.
