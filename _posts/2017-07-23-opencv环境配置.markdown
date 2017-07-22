@@ -149,7 +149,7 @@ import cv2
 ```
 没报错的话就是成功啦
 
-测试一下
+### 实例代码
 ```python
 import cv2
 import numpy as np
