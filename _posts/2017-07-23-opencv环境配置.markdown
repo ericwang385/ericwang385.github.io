@@ -18,7 +18,7 @@ tags:
 这篇文章里会初步介绍一下opencv在多个平台下下载安装以及环境的配置
 
   
-## OpenCV的安装
+## 1.OpenCV的安装
 
 <h3>Windows平台下</h3>
 
