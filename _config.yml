@@ -34,7 +34,7 @@ kramdown:
   input: GFM                            # use Github Flavored Markdown !important
 
 # UY comment
-uy: false                               # whether or not using uy comment
+uy: true                               # whether or not using uy comment
 uy_uid: 2138472
 
 # Baidu Share
