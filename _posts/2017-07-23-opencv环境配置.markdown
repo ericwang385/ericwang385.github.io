@@ -131,6 +131,7 @@ $ sudo xcode-select --install
 再安装Python-OpenCV的依赖包
 ```bash
 $ pip install numpy
+$ pip install matplotlib
 ```
 安装OpenCV
 ```bash
@@ -147,3 +148,15 @@ $ brew install opencv3 --with-contrib --with-python3 --HEAD
 import cv2
 ```
 没报错的话就是成功啦
+
+测试一下
+```python
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+
+img = cv2.imread('你自己的图片', 0)
+plt.imshow(img, cmap='gray', interpolation='bicubic')
+plt.xticks([]), plt.yticks([]) # to hide tick values on X and Y axis
+plt.show()
+```
