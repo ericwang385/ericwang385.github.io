@@ -1,0 +1,19 @@
+---
+layout:     post
+title:      "Hello world, 2017"
+subtitle:   "欢迎使用"
+date:       2017-07-22 18:03:00
+author:     "Psyduck"
+header-img: "img/bg/hello world.jpg"
+catalog: true
+tags:
+    - 闲扯
+---
+折腾了两天，这个个人网站终于成功上线了，首先非常感谢 <a href="http://huangxuan.me/">Hux</a>以及 <a href="http://xiaosheng.me/">小昇</a>的模板<br>
+以及深更半夜帮助我找错的沈老板orz</br>
+未来几天会陆续把以前学过的一些东西写一些发上来<br>
+<h1><strong>敬请期待</strong></h1>
+<br>
+
+![1](/img/face.jpeg)
+
