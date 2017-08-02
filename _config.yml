@@ -62,5 +62,9 @@ friends: [
     {
         title: "喵神的博客",
         href: "https://ybmj.github.io/"
+    },
+    {
+        title: "梁神的博客",
+        href: "http://mzz.pub"
     }
 ]
