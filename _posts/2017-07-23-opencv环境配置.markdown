@@ -54,7 +54,7 @@ brew install opencv3 #opencv3.x
 
 然后就可以愉快的开始敲代码啦(´▽｀)
 
-### Clion配置
+### Clion配置
 
 1. 创建一个Clion项目名为“opencv_test”
 2. 打开其中<code>CMakeLists.txt</code>输入：
