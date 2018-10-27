@@ -1,8 +1,8 @@
 ---
 layout:     post
-title:      "简单信号处理与压缩感知初步"
-subtitle:   "opencv环境配置"
-date:       2017-10-19 11:00:00
+title:      "简单信号处理"
+subtitle:   ""
+date:       2018-10-277 11:00:00
 author:     "Psyduck"
 header-img: "img/2017-7-23/header.jpg"
 catalog: true
