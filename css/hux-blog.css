@@ -1,4 +1,4 @@
-@media (min-width: 1200px) {
+@media (min-width: 1000px) {
   .post-container,
   .sidebar-container {
     padding-right: 5%;
@@ -1089,3 +1089,4 @@ img::-moz-selection {
 .page-fullscreen footer .copyright a:hover {
   color: #ddd;
 }
+img { zoom: 25%; }
