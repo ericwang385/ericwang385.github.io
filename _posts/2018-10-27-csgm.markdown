@@ -13,7 +13,7 @@ tags:
 
 > 因为我家那个小笨蛋要出什么公开赛的题目。。。在官方题解里挂了我这个博客的友链，感觉博客一直破破烂烂的又没啥文章有点不太好意思XD，就把之前组会讲的东西拿出来写一写。
 >
->  又及，本文所有图片全部来自于[polikar_wavelets](../source/polikar_wavelets.pdf)
+>  又及，本文所有图片全部来自于[polikar_wavelets](/source/polikar_wavelets.pdf)
 
 ------
 
