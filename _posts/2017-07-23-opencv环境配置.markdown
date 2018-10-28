@@ -8,6 +8,7 @@ header-img: "img/2017-7-23/header.jpg"
 catalog: true
 tags:
     - OpenCV
+typora-root-url: ../
 ---
 
 <a href="https://baike.baidu.com/item/opencv/10320623?fr=aladdin">OpenCV</a>
@@ -74,7 +75,7 @@ add_executable(opencv_test ${SOURCE_FILES})
 target_link_libraries(opencv_test ${OpenCV_LIBS})
 ```
 
-![2](../img/2017-7-23/cmake.png)
+![2](/img/2017-7-23/cmake.png)
 
 然后也可以愉快的开始敲代码啦(´▽｀)
 

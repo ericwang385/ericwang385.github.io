@@ -1,14 +1,15 @@
 ---
 layout:     post
 title:      "简单信号处理"
-subtitle:   " "
-date:       2018-10-27 11:00:00
+subtitle:   ""
+date:       2018-10-27 
 author:     "Psyduck"
 header-img: "img/2017-7-23/header.jpg"
 catalog: true
 tags:
     - Signal processing
     - Compressed Sensing
+typora-root-url: ../
 ---
 
 > 因为我家那个小笨蛋要出什么公开赛的题目。。。在官方题解里挂了我这个博客的友链，感觉博客一直破破烂烂的又没啥文章有点不太好意思XD，就把之前组会讲的东西拿出来写一写。
