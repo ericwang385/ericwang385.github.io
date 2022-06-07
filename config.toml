@@ -10,9 +10,6 @@ paginate  = 10
 rssLimit  = 10  # Maximum number of items in the RSS feed.
 copyright = "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License." # This message is only used by the RSS template.
 
-# googleAnalytics = ""
-# disqusShortname = ""
-
 archetypeDir = "archetypes"
 contentDir   = "content"
 dataDir      = "data"
@@ -116,10 +113,10 @@ disableHugoGeneratorInject = false
     author = true
 
     topText = []
-    bottomText = [
-      "Powered by <a href=\"http://gohugo.io\">Hugo</a>",
-      "Made with &#10084; by <a href=\"https://github.com/rhazdon\">Djordje Atlialp</a>"
-    ]
+    # bottomText = [
+    #   "Powered by <a href=\"http://gohugo.io\">Hugo</a>",
+    #   "Made with &#10084; by <a href=\"https://github.com/rhazdon\">Djordje Atlialp</a>"
+    # ]
 
   # Colors for favicons
   #
