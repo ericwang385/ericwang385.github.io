@@ -1,6 +1,6 @@
 baseURL = "https://ericwang385.github.io"
 title   = "Eric Wang"
-languageCode = "en-us"
+languageCode = "zh-cn"
 
 
 PygmentsCodeFences = true
