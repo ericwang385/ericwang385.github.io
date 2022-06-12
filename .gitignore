@@ -15,3 +15,6 @@ hugo.linux
 .DS_Store
 
 .vscode
+
+# customize Headers whiteout touch git submodule.
+layouts/partials/extra-head.html

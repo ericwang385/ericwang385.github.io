@@ -1,7 +1,7 @@
 baseURL = "https://ericwang385.github.io"
 title   = "Eric Wang"
 languageCode = "en-us"
-theme = "hello-friend-ng"
+theme = ""
 
 PygmentsCodeFences = true
 PygmentsStyle = "monokai"
