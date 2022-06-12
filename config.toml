@@ -2,7 +2,6 @@ baseURL = "https://ericwang385.github.io"
 title   = "Eric Wang"
 languageCode = "zh-cn"
 
-
 PygmentsCodeFences = true
 PygmentsStyle = "monokai"
 
@@ -11,10 +10,10 @@ rssLimit  = 10  # Maximum number of items in the RSS feed.
 copyright = "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License." # This message is only used by the RSS template.
 
 archetypeDir = "archetypes"
-contentDir   = "content"
 dataDir      = "data"
 layoutDir    = "layouts"
 publishDir   = "public"
+contentDir   = "content"
 
 buildDrafts  = false
 buildFuture  = false
@@ -42,7 +41,7 @@ disableHugoGeneratorInject = false
 [taxonomies]
   tag      = "tags"
   category = "categories"
-  series   = "series"
+  # series   = "series"
 
 [params]
   dateform        = "Jan 2, 2006"
@@ -52,7 +51,7 @@ disableHugoGeneratorInject = false
 
   # Metadata mostly used in document's head
   # 
-  description = "Nice theme for homepages and blogs"
+  description = ""
   keywords = ""
   images = [""]
 
@@ -77,7 +76,7 @@ disableHugoGeneratorInject = false
   # Per default, this option is off. 
   # The theme is respecting the prefers-color-scheme of the operating systeme. 
   # With this option on, the page user is able to set the scheme he wants. 
-  enableThemeToggle = false
+  enableThemeToggle = true
 
   # Sharing buttons
   #
@@ -85,13 +84,13 @@ disableHugoGeneratorInject = false
   # generate the buttons here: https://sharingbuttons.io
   # and add them into your own `layouts/partials/sharing-buttons.html`
   #
-  enableSharingButtons = true
+  enableSharingButtons = false
 
   # Global language menu
   #
   # Enables the global language menu.
   #
-  enableGlobalLanguageMenu = true
+  enableGlobalLanguageMenu = false
 
   # Integrate Javascript files or stylesheets by adding the url to the external assets or by
   # linking local files with their path relative to the static folder, e.g. "css/styles.css"
@@ -147,8 +146,6 @@ disableHugoGeneratorInject = false
   # [params.commento]
   #   url = ""
 
-  # Uncomment this if you want a portrait on your start page
-  #
   [params.portrait]
     path     = "images/Profile.jpg"
     alt      = "Portrait"
@@ -156,30 +153,37 @@ disableHugoGeneratorInject = false
 
   [[params.social]]
     name = "email"
-    url  = "mailto:nobody@example.com"
+    url  = "cwang7@stevens.edu.com"
 
   [[params.social]]
     name = "github"
-    url  = "https://github.com/"
+    url  = "https://github.com/ericwang385/"
 
   [[params.social]]
     name = "zhihu"
-    url  = "https://www.linkedin.com/"
+    url  = "https://www.zhihu.com/people/wang-cheng-yuan-5"
 
-  # [[params.social]]
-  #   name = "stackoverflow"
-  #   url  = "https://www.stackoverflow.com/"
+# defaultContentLang = "zh-cn"
 
-[languages]
+# [languages]
+#   [languages.zh-cn]
+#     subtitle  = "Hello Friend NG Theme"
+#     hasCJKLanguage = true
+#     contentDir = 'content/zh-cn'
+#     weight    = 1
+#     copyright = '<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>'
+
   [languages.en]
-    subtitle  = "Hello Friend NG Theme"
+    # subtitle  = "Hello Friend NG Theme"
     weight    = 1
+    # contentDir = 'content/en'
     copyright = '<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>'
+#   [languages.ja]
+#     subtitle  = "Hello Friend NG Theme"
+#     weight    = 3
+#     contentDir = 'content/jp'
+#     copyright = '<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>'
 
-  # [languages.fr]
-  #   subtitle  = "Hello Friend NG Theme"
-  #   weight    = 2
-  #   copyright = '<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>'
 
 [menu]
   [[menu.main]]
@@ -190,3 +194,7 @@ disableHugoGeneratorInject = false
     identifier = "posts"
     name       = "Posts"
     url        = "posts/"
+  [[menu.main]]
+    identifier = "tags"
+    name       = "Tags"
+    url        = "tags/"
