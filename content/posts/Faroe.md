@@ -1,11 +1,12 @@
 ---
 title: "法罗群岛"
 date: 2022-06-15
-draft: true
+draft: false
 toc: false
 images:
 tags:
   - Travel
+  - abc
 ---
 
 # Before Arrival
