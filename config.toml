@@ -153,15 +153,19 @@ disableHugoGeneratorInject = false
 
   [[params.social]]
     name = "email"
-    url  = "cwang7@stevens.edu.com"
+    url  = "mailto:cwang7@stevens.edu.com"
 
   [[params.social]]
     name = "github"
     url  = "https://github.com/ericwang385/"
 
   [[params.social]]
-    name = "zhihu"
-    url  = "https://www.zhihu.com/people/wang-cheng-yuan-5"
+    name = "instagram"
+    url = "https://www.instagram.com/psyduck385/"
+
+  # [[params.social]]
+  #   name = "zhihu"
+  #   url  = "https://www.zhihu.com/people/wang-cheng-yuan-5"
 
 # defaultContentLang = "zh-cn"
 
