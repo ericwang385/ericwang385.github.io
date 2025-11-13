@@ -26,16 +26,6 @@ draft: false
 
 ### Papers & Technical Reports
 
-
-
-<!-- ---
-
-## News
-
-* **January 2025**: Created comprehensive academic personal homepage
-* **2024**: Pursuing graduate studies at Stevens Institute of Technology
-* **Previous Years**: Active participation in various research projects and open-source contributions -->
-
 ---
 
 ## Education
