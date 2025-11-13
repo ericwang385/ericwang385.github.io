@@ -10,7 +10,7 @@ draft: false
 
 **Email:** cwang7 [at] stevens [dot] edu  
 **GitHub:** [github.com/ericwang385](https://github.com/ericwang385/)  
-[**CV**](/cv/Eric_s_Resume.pdf)
+[**CV**](/cv/Resume.pdf)
 
 ---
 
