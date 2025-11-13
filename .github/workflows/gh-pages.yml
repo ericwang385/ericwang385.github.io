@@ -34,7 +34,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
   clean-logs:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: igorjs/gh-actions-clean-workflow@v3
         with:
