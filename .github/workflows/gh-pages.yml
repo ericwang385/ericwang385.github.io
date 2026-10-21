@@ -2,41 +2,60 @@ name: GitHub Pages
 
 on:
   push:
-    branches:
-      - main  # Set a branch to deploy
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HUGO_VERSION: '0.168.0'
+  DART_SASS_VERSION: '1.105.2'
+  DART_SASS_SHA256: 'a530ee08d5792c80bdb9d9614b45fb58219c890cb42a280a80775f0af9c29582'
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+    permissions:
+      contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7.0.1
         with:
-          submodules: true  # Fetch Hugo themes (true OR recursive)
-          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+          persist-credentials: false
 
       - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v2
+        uses: peaceiris/actions-hugo@v3.2.1
         with:
-          hugo-version: '0.68.3'
-          extended: true
+          hugo-version: ${{ env.HUGO_VERSION }}
+
+      - name: Setup Dart Sass
+        shell: bash
+        run: |
+          archive="${RUNNER_TEMP}/dart-sass.tar.gz"
+          curl --fail --location --retry 3 \
+            "https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz" \
+            --output "$archive"
+          printf '%s  %s\n' "$DART_SASS_SHA256" "$archive" | sha256sum --check
+          tar -xzf "$archive" -C "$RUNNER_TEMP"
+          echo "${RUNNER_TEMP}/dart-sass" >> "$GITHUB_PATH"
 
       - name: Build
-        run: hugo --minify
+        run: hugo --minify --panicOnWarning
+
+      - name: Check generated site
+        run: python3 scripts/check_site.py public
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
           publish_dir: ./public
-  clean-logs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: igorjs/gh-actions-clean-workflow@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          days_old: 2
+          cname: psyduck.wang

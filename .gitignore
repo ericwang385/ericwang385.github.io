@@ -17,4 +17,4 @@ hugo.linux
 .vscode
 
 # customize Headers whiteout touch git submodule.
-layouts/partials/extra-head.html
+layouts/_partials/extra-head.html

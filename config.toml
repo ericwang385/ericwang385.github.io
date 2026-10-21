@@ -1,12 +1,8 @@
-baseURL = "https://psyduck.wang"
+baseURL = "https://psyduck.wang/"
 title   = "Eric Wang"
-languageCode = "zh-cn"
+locale = "en-US"
+defaultContentLanguage = "en"
 
-PygmentsCodeFences = true
-PygmentsStyle = "monokai"
-
-paginate  = 10
-rssLimit  = 10  # Maximum number of items in the RSS feed.
 copyright = "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License." # This message is only used by the RSS template.
 
 archetypeDir = "archetypes"
@@ -18,25 +14,28 @@ contentDir   = "content"
 buildDrafts  = false
 buildFuture  = false
 buildExpired = false
-canonifyURLs = true
 
 enableRobotsTXT = true
 enableGitInfo   = false
 enableEmoji     = true
 enableMissingTranslationPlaceholders = false
-disableRSS     = false
-disableSitemap = false
-disable404     = false
 disableHugoGeneratorInject = false
 
 [permalinks]
   posts = "/posts/:year/:month/:title/"
 
-[author]
-  name = "Eric Wang"
+[pagination]
+  pagerSize = 10
 
-[blackfriday]
-  hrefTargetBlank = true
+[services.rss]
+  limit = 10
+
+[markup.highlight]
+  codeFences = true
+  style = "monokai"
+
+[module.hugoVersion]
+  min = "0.168.0"
 
 [taxonomies]
   tag      = "tags"
@@ -53,7 +52,7 @@ disableHugoGeneratorInject = false
   # 
   description = ""
   keywords = ""
-  images = [""]
+  images = []
 
   # Home subtitle of the index page.
   #
@@ -82,7 +81,7 @@ disableHugoGeneratorInject = false
   #
   # There are a lot of buttons preconfigured. If you want to change them,
   # generate the buttons here: https://sharingbuttons.io
-  # and add them into your own `layouts/partials/sharing-buttons.html`
+  # and add them into your own `layouts/_partials/sharing-buttons.html`
   #
   enableSharingButtons = false
 
@@ -98,13 +97,16 @@ disableHugoGeneratorInject = false
   customCSS = []
   customJS  = []
 
-  # Toggle this option need to rebuild SCSS, requires extended version of Hugo
+  # Rebuild the SCSS with Dart Sass when this option changes.
   #
   justifyContent = false  # Set "text-align: justify" to .post-content.
 
   # Custom footer 
   # If you want, you can easily override the default footer with your own content. 
   #
+  [params.author]
+    name = "Eric Wang"
+
   [params.footer]
     trademark = true
     rss = false
@@ -153,7 +155,7 @@ disableHugoGeneratorInject = false
 
   [[params.social]]
     name = "email"
-    url  = "mailto:cwang7@stevens.edu.com"
+    url  = "mailto:cwang7@stevens.edu"
 
   [[params.social]]
     name = "github"
