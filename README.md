@@ -1,4 +1,4 @@
-# Eric Wang's personal website
+# Eric Chengyuan Wang's personal website
 
 Source for <https://psyduck.wang/>. Hugo builds the site. GitHub Pages serves the generated files from the `gh-pages` branch.
 
@@ -32,7 +32,7 @@ Run these commands from the repository directory:
 hugo server --buildDrafts
 ```
 
-Open <http://localhost:1313/>. The home page redirects to the local About page.
+Open <http://localhost:1313/> to view the profile. The About menu link returns to `/`. The Blog menu link opens `/posts/`. Both links stay visible on small screens. The old `/about/` URL redirects to the home page.
 
 ## Build and check
 
@@ -45,7 +45,10 @@ The build stops on Hugo warnings. The check verifies the main routes, local link
 
 ## Edit the site
 
-- `content/about.md`: profile and research details.
+- `content/_index.md`: home page content. The front matter holds the profile, contact links, and section navigation. The Markdown body holds the biography, publications, research, and education.
+- `layouts/home.html`: academic home page layout.
+- `assets/scss/_about.scss`: academic home page styles and shared navigation colors.
+- `content/posts/_index.md`: blog page title and description.
 - `content/posts/`: blog posts.
 - `static/cv/Resume.pdf`: CV.
 - `static/images/Profile.jpg`: portrait.

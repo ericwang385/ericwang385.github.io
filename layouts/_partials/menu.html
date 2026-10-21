@@ -1,23 +1,14 @@
-<nav class="menu">
+<nav class="menu" aria-label="Main navigation">
     <ul class="menu__inner">
         {{- $currentPage := . -}}
         {{ range .Site.Menus.main -}}
-            <li><a href="{{ .URL | relLangURL }}">{{ .Name }}</a></li>
+            {{- $active := or (and (eq .Identifier "about") $currentPage.IsHome) (and (eq .Identifier "blog") (eq $currentPage.Section "posts")) -}}
+            <li><a href="{{ .URL | relLangURL }}"{{ if $active }} aria-current="{{ if $currentPage.IsPage }}true{{ else }}page{{ end }}"{{ end }}>{{ .Name }}</a></li>
         {{- end }}
-
-        {{- if .Site.Params.EnableGlobalLanguageMenu }}
-        <div class="submenu">
-            <li class="dropdown">
-                <a href="javascript:void(0)" class="dropbtn">{{ .Language }}</a>
-                <div class="dropdown-content">
-                    {{ if hugo.IsMultilingual }}
-                        {{ range $.Translations }}
-                            <a title="{{ .Language }}" href="{{ .Permalink }}">{{ .Language }}</a>
-                        {{ end }}
-                    {{ end }}
-                </div>
-            </li>
-        </div>
+        {{- if and .Site.Params.EnableGlobalLanguageMenu hugo.IsMultilingual }}
+            {{ range .Translations }}
+                <li><a href="{{ .RelPermalink }}" lang="{{ .Language.Lang }}">{{ .Language.LanguageName | default .Language.Lang }}</a></li>
+            {{ end }}
         {{- end }}
     </ul>
 </nav>

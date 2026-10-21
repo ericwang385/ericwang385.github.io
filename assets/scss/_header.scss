@@ -1,65 +1,78 @@
-@use "variables" as *;
-
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding: 20px;
-  // Default
-  background: $light-background-header;
-
-  @media (prefers-color-scheme: dark) {
-    background: $dark-background-header;
-  }
-
-  @media (prefers-color-scheme: light) {
-    background: $light-background-header;
-  }
-
-  [data-theme=dark] & {
-    background: $dark-background-header;
-  }
-
-  [data-theme=light] & {
-    background: $light-background-header;
-  }
-
-  &__right {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
-    @media #{$media-size-phone} {
-      flex-direction: row-reverse;
-    }
-  }
+  padding: 0 28px;
+  border-bottom: 1px solid var(--academic-rule);
+  letter-spacing: normal;
 
   &__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 0 auto;
-    width: 760px;
+    gap: 24px;
+    width: 1040px;
     max-width: 100%;
+    min-height: 80px;
+    margin: 0 auto;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-shrink: 0;
   }
 }
 
-.theme-toggle {
-  display: flex;
+.site-name {
+  color: var(--academic-ink);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.header .theme-toggle {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
+  width: 36px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--academic-muted);
   cursor: pointer;
+
+  &:hover {
+    background: transparent;
+    color: var(--academic-link);
+    transform: none;
+  }
 }
 
-.theme-toggler {
-  fill: currentColor;
+.theme-toggler { fill: currentColor; }
+
+.header a:focus-visible,
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--academic-link);
+  outline-offset: 5px;
 }
 
-.not-selectable {
-  user-select: none;
-  -webkit-user-select: none;  
-  -moz-user-select: none;    
-  -ms-user-select: none;      
+@media (max-width: 600px) {
+  .header {
+    padding: 12px 20px 6px;
+
+    &__inner {
+      flex-wrap: wrap;
+      min-height: auto;
+      gap: 4px 20px;
+    }
+
+    &__right {
+      gap: 16px;
+      margin-left: auto;
+    }
+  }
+
+  .site-name { font-size: 0.875rem; }
 }

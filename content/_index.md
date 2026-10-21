@@ -3,37 +3,52 @@ title: "Eric Chengyuan Wang"
 date: 2025-01-08
 lastmod: 2026-10-20
 description: "Computer Science Ph.D. student at Stevens Institute of Technology. Research in programming languages, formal methods, compiler correctness, and systems verification."
+aliases:
+  - /about/
 draft: false
+focus: "Programming languages · Formal methods · Systems verification"
+profile:
+  image: "images/Profile.jpg"
+  image_alt: "Eric Chengyuan Wang's Psyduck avatar"
+  role: "Ph.D. Student"
+  department: "Computer Science"
+  institution: "Stevens Institute of Technology"
+  advisor: "Michael Greenberg"
+  email: "cwang7@stevens.edu"
+  phone: "+1 551 344 5797"
+  github: "https://github.com/ericwang385/"
+  github_name: "ericwang385"
+  cv: "cv/Resume.pdf"
+sections:
+  - name: "Publications"
+    id: "publications"
+  - name: "Research"
+    id: "research"
+  - name: "Education"
+    id: "education"
+  - name: "Experience"
+    id: "professional-experience"
 ---
 
-![Eric Chengyuan Wang](/images/Profile.jpg)
-
-## Ph.D. Student in Computer Science
-
-**Stevens Institute of Technology**\
-**Advisor:** Michael Greenberg\
-**Email:** [cwang7@stevens.edu](mailto:cwang7@stevens.edu)\
-**Phone:** +1 551 344 5797\
-**GitHub:** [ericwang385](https://github.com/ericwang385/)\
-[**Download CV**](/cv/Resume.pdf)
-
----
-
-[About](#about-me) · [Research](#research) · [Publications](#publications) · [Education](#education) · [Experience](#professional-experience) · [Skills](#technical-skills) · [Awards](#honors--awards)
-
-## About Me
-
-I am Eric Chengyuan Wang, a Ph.D. student in Computer Science at Stevens Institute of Technology. My advisor is Michael Greenberg. My research focuses on programming languages and formal methods, with particular interest in compiler correctness and the verification of systems software.
+I am a Ph.D. student in Computer Science at Stevens Institute of Technology. My advisor is Michael Greenberg. My research focuses on programming languages and formal methods, with particular interest in compiler correctness and the verification of systems software.
 
 My current work includes POSIX shell compiler verification, incremental execution, and eBPF verification. I work on the incrementalization and eBPF projects with ATLAS Lab at Brown University. I expect to graduate in May 2028.
 
-**Internship availability:** May–September 2027. I am interested in formal methods and compiler engineering roles.
+**Research interests:** Programming languages, type systems, effect handlers, compiler optimization and correctness, language-based security, information-flow control, and system verification.
 
-### Research Interests
+> **Internship availability · May–September 2027.** I am interested in formal methods and compiler engineering roles.
 
-- Programming languages, type systems, and effect handlers.
-- Compiler optimization and correctness.
-- Language-based security, information-flow control, and system verification.
+## Publications
+
+### [A Neural Rendering Framework for Free-Viewpoint Relighting](https://openaccess.thecvf.com/content_CVPR_2020/papers/Chen_A_Neural_Rendering_Framework_for_Free-Viewpoint_Relighting_CVPR_2020_paper.pdf)
+
+Zhang Chen, Anpei Chen, Guli Zhang, **Chengyuan Wang**, Yu Ji, Kiriakos N. Kutulakos, and Jingyi Yu.
+
+**CVPR 2020** · Accepted paper.
+
+[Paper](https://openaccess.thecvf.com/content_CVPR_2020/papers/Chen_A_Neural_Rendering_Framework_for_Free-Viewpoint_Relighting_CVPR_2020_paper.pdf) · [arXiv](https://arxiv.org/abs/1911.11530) · [Code](https://github.com/LansburyCH/relightable-nr)
+
+At MARS Lab (September 2019–February 2020, Shanghai), I built a relightable rendering model. I used a graph neural network (GNN) to extract 3D features from point clouds.
 
 ## Research
 
@@ -43,11 +58,15 @@ My current work includes POSIX shell compiler verification, incremental executio
 
 I am developing a Coq model of core POSIX shell features, including pipelines and background commands. The model includes process management and filesystem behavior. I am working to verify that shell programs parallelized by PaSh are equivalent to their sequential execution.
 
+*Planned submission: POPL 2028.*
+
 ### Incrementalization System Verification
 
 **ATLAS Lab, Brown University · June 2026–present · Providence, USA**
 
 I am formalizing the execution semantics of a system that adds incremental execution to shell programs. I am working to establish an equivalence relation between incremental execution and standard shell execution under specified assumptions.
+
+*Planned submission: PLDI 2027.*
 
 ### eBPF Verification in Lean
 
@@ -61,29 +80,13 @@ I built a C-like DSL in Lean for writing eBPF programs. It supports eBPF helper 
 
 I designed an inference-based algorithm to migrate untyped programs to gradually typed programs. I defined migration safety as introducing no new static errors. I proved this property for the proposed algorithm and existing migration approaches.
 
+*Planned submission: PLDI 2027.*
+
 ### Static Policy Enforcement for a Functional Programming Language
 
 **Master's thesis · February–June 2022 · Gothenburg, Sweden**
 
 I formalized purpose limitation, a policy in the General Data Protection Regulation (GDPR). I designed an information-flow control type system to check this policy statically and implemented it in Haskell. I formalized the type system in Agda and proved soundness and noninterference.
-
-## Publications
-
-### Accepted: CVPR 2020
-
-**A Neural Rendering Framework for Free-Viewpoint Relighting**\
-Zhang Chen, Anpei Chen, Guli Zhang, **Chengyuan Wang**, Yu Ji, Kiriakos N. Kutulakos, and Jingyi Yu.
-
-[Paper](https://openaccess.thecvf.com/content_CVPR_2020/papers/Chen_A_Neural_Rendering_Framework_for_Free-Viewpoint_Relighting_CVPR_2020_paper.pdf) · [arXiv](https://arxiv.org/abs/1911.11530) · [Code](https://github.com/LansburyCH/relightable-nr)
-
-**MARS Lab · September 2019–February 2020 · Shanghai, China**
-
-I built a relightable rendering model. I used a graph neural network (GNN) to extract 3D features from point clouds.
-
-### Target Venues
-
-- **POPL 2028:** [POSIX Shell Compiler Verification](#posix-shell-compiler-verification).
-- **PLDI 2027:** [Safe Gradual Type Migration](#safe-gradual-type-migration) and [Incrementalization System Verification](#incrementalization-system-verification).
 
 ## Education
 
@@ -129,16 +132,7 @@ I worked on a 3D face reconstruction project. I built and compressed a neural ne
 - **Compiler tools:** LLVM.
 - **Machine learning tools:** PyTorch.
 
-## Honors & Awards
-
-- **Second Class Prize**, ASC Student Supercomputer Challenge, 2019.
-- **Silver medal**, TensorFlow Speech Recognition Challenge on Kaggle.
-
 ## Languages
 
 - **Mandarin Chinese:** Native speaker.
 - **English:** Fluent.
-
----
-
-*Last updated: October 20, 2026.*

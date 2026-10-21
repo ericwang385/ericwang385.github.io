@@ -1,26 +1,36 @@
-{{ define "body" }}
-    <body class="{{ if .Site.Params.backgroundImage }} background-image" style="background-image: url('{{ .Site.Params.backgroundImage }}');" {{ else }}"{{ end }}>
-{{ end }}
-
 {{ define "main" }}
-    <main>
-        {{ with .Site.GetPage "/about" }}
-        <meta http-equiv="refresh" content="0; url={{ .RelPermalink }}" />
+    <main class="academic-home" id="main-content">
+        <header class="academic-intro" id="about-me">
+            <h1>{{ .Title }}</h1>
+            <p class="academic-focus">{{ .Params.focus }}</p>
+        </header>
+
+        {{ with .Params.profile }}
+        <aside class="academic-profile" aria-label="Profile and contact details">
+            <img class="academic-portrait" src="{{ .image | relURL }}" alt="{{ .image_alt }}" width="180" height="180">
+            <div class="academic-contact">
+                <p class="academic-role">{{ .role }}</p>
+                <p class="academic-affiliation">{{ .department }}<br>{{ .institution }}</p>
+                <p class="academic-advisor">Advisor: {{ .advisor }}</p>
+                <ul class="academic-links">
+                    <li><a href="mailto:{{ .email }}">{{ .email }}</a></li>
+                    <li><a href="{{ .cv | relURL }}">Curriculum vitae <span class="academic-filetype">PDF</span></a></li>
+                    <li><a href="{{ .github }}">GitHub · {{ .github_name }}</a></li>
+                </ul>
+                <p class="academic-phone">{{ .phone }}</p>
+            </div>
+            <nav class="academic-sections" aria-label="On this page">
+                <span class="academic-nav-label">On this page</span>
+                {{ range $.Params.sections }}
+                    <a href="#{{ .id }}">{{ .name }}</a>
+                {{ end }}
+            </nav>
+        </aside>
         {{ end }}
-        <div>
-            {{ if .Site.Params.Portrait.Path }}
-               <img src="{{ .Site.Params.Portrait.Path | relURL }}" class="circle" alt="{{ .Site.Params.Portrait.Alt }}" style="max-width:{{ .Site.Params.Portrait.MaxWidth }}" />
-            {{ end }}
 
-            <h1>{{ .Site.Title }}</h1>
-
-            {{ partial "subtitle.html" . }}
-
-            {{- with .Site.Params.social }}
-                <div>
-                    {{ partial "social-icons.html" . }}
-                </div>
-            {{- end }}
-        </div>
+        <article class="academic-content" aria-label="Academic biography">
+            {{ .Content }}
+            <p class="academic-updated">Last updated: <time datetime="{{ .Lastmod.Format "2006-01-02" }}">{{ .Lastmod.Format "January 2, 2006" }}</time>.</p>
+        </article>
     </main>
 {{ end }}

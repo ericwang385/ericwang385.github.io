@@ -1,30 +1,304 @@
-// Style for profile photo on about page
-.post-content {
-  img[alt="Eric Chengyuan Wang"] {
-    float: left;
-    margin-right: 30px;
-    margin-bottom: 10px;
-    margin-top: 0;
-    border-radius: 10px;
-    max-width: 180px;
-    height: auto;
+// Shared colors for the academic home page and site navigation.
+@mixin light-colors {
+  --academic-ink: #25313b;
+  --academic-muted: #5e6b76;
+  --academic-link: #245d80;
+  --academic-rule: #dce2e6;
+  --academic-note: #f3f6f8;
+}
+
+@mixin dark-colors {
+  --academic-ink: #e2e5e9;
+  --academic-muted: #b1b9c2;
+  --academic-link: #9dcce9;
+  --academic-rule: #454c54;
+  --academic-note: #2b3035;
+}
+
+:root { @include light-colors; }
+
+@media (prefers-color-scheme: dark) {
+  :root { @include dark-colors; }
+}
+
+[data-theme="light"] { @include light-colors; }
+[data-theme="dark"] { @include dark-colors; }
+
+.academic-home {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  column-gap: 64px;
+  width: 1040px;
+  max-width: calc(100% - 56px);
+  margin: 64px auto 24px;
+  color: var(--academic-ink);
+  text-align: left;
+  letter-spacing: normal;
+  font-feature-settings: normal;
+  line-height: 1.75;
+
+  a {
+    color: var(--academic-link);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+
+    &:hover {
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--academic-link);
+      outline-offset: 4px;
+    }
   }
-  
-  // Reduce spacing after image
-  img[alt="Eric Chengyuan Wang"] + h2 {
-    margin-top: 0;
-  }
-  
-  // Clear float after contact info
-  hr:first-of-type {
-    clear: both;
+
+  strong, em { color: inherit; }
+}
+
+.academic-intro {
+  grid-column: 2;
+  grid-row: 1;
+  margin-bottom: 20px;
+
+  h1 {
+    margin: -8px 0 6px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2rem, 3.3vw, 2.75rem);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
   }
 }
 
-@media (max-width: 768px) {
-  .post-content img[alt="Eric Chengyuan Wang"] {
-    float: none;
-    display: block;
-    margin: 0 auto 20px;
+.academic-focus {
+  margin: 0;
+  color: var(--academic-muted);
+  font-size: 0.95rem;
+}
+
+.academic-profile {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: start;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.academic-portrait {
+  width: 180px;
+  height: 180px;
+  margin: 0 0 24px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.academic-role {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.academic-affiliation { margin: 0 0 12px; }
+
+.academic-advisor {
+  margin: 0 0 18px;
+  color: var(--academic-muted);
+}
+
+.academic-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li { margin: 9px 0; }
+
+  a {
+    text-decoration: none;
+    overflow-wrap: anywhere;
   }
+}
+
+.academic-filetype {
+  margin-left: 4px;
+  color: var(--academic-muted);
+  font-size: 0.7rem;
+}
+
+.academic-phone {
+  margin: 12px 0 0;
+  color: var(--academic-muted);
+}
+
+.academic-sections {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--academic-rule);
+
+  a { text-decoration: none; }
+}
+
+.academic-nav-label {
+  margin-bottom: 3px;
+  color: var(--academic-muted);
+  font-size: 0.75rem;
+}
+
+.academic-content {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+
+  > p:first-child { margin-top: 0; }
+
+  p { margin: 0 0 16px; }
+
+  h2 {
+    display: block;
+    margin: 40px 0 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--academic-rule);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.65rem;
+    font-weight: 400;
+    scroll-margin-top: 24px;
+  }
+
+  h3 {
+    display: block;
+    margin: 26px 0 5px;
+    font-size: 1.03rem;
+    line-height: 1.55;
+    scroll-margin-top: 24px;
+
+    a { text-decoration: none; }
+  }
+
+  h2 + h3 { margin-top: 0; }
+
+  #publications + h3 + p strong {
+    color: var(--academic-ink);
+    font-weight: 700;
+  }
+
+  h3 + p {
+    margin-bottom: 10px;
+    color: var(--academic-muted);
+    font-size: 0.875rem;
+    line-height: 1.65;
+
+    strong { font-weight: 500; }
+  }
+
+  ul {
+    margin: 0 0 20px;
+    padding-left: 20px;
+  }
+
+  li {
+    margin: 5px 0;
+    padding-left: 3px;
+  }
+
+  // A plain Markdown blockquote marks internship availability.
+  blockquote {
+    margin: 24px 0 28px;
+    padding: 13px 18px;
+    border-left: 2px solid var(--academic-link);
+    background: var(--academic-note);
+    font-size: 0.9rem;
+
+    &::before { content: none; }
+    p { margin: 0; }
+  }
+}
+
+.academic-updated {
+  margin-top: 40px !important;
+  padding-top: 18px;
+  border-top: 1px solid var(--academic-rule);
+  color: var(--academic-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 900px) {
+  .academic-home {
+    grid-template-columns: 190px minmax(0, 1fr);
+    column-gap: 36px;
+    margin-top: 44px;
+  }
+
+  .academic-portrait {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+@media (max-width: 700px) {
+  .academic-home {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: calc(100% - 40px);
+    margin-top: 36px;
+  }
+
+  .academic-intro {
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 24px;
+  }
+
+  .academic-profile {
+    display: grid;
+    grid-template-columns: 116px minmax(0, 1fr);
+    gap: 0 24px;
+    grid-column: 1;
+    grid-row: 2;
+    margin-bottom: 26px;
+  }
+
+  .academic-portrait {
+    width: 116px;
+    height: 116px;
+    margin: 0;
+  }
+
+  .academic-role { font-size: 0.9rem; }
+
+  .academic-sections {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-top: 24px;
+    padding-top: 16px;
+  }
+
+  .academic-nav-label { display: none; }
+
+  .academic-content {
+    grid-column: 1;
+    grid-row: 3;
+
+    h2 { margin-top: 32px; }
+  }
+}
+
+@media (max-width: 380px) {
+  .academic-profile {
+    grid-template-columns: 88px minmax(0, 1fr);
+    column-gap: 18px;
+  }
+
+  .academic-portrait {
+    width: 88px;
+    height: 88px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }
