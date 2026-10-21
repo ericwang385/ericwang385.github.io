@@ -1,5 +1,5 @@
 baseURL = "https://psyduck.wang/"
-title   = "Eric Wang"
+title   = "Eric Chengyuan Wang"
 locale = "en-US"
 defaultContentLanguage = "en"
 
@@ -50,13 +50,13 @@ disableHugoGeneratorInject = false
 
   # Metadata mostly used in document's head
   # 
-  description = ""
-  keywords = ""
+  description = "Eric Chengyuan Wang is a Computer Science Ph.D. student at Stevens Institute of Technology. His research focuses on programming languages, formal methods, and compiler correctness."
+  keywords = "Eric Chengyuan Wang, Chengyuan Wang, Eric Wang, programming languages, formal methods, compiler correctness, systems verification"
   images = []
 
   # Home subtitle of the index page.
   #
-  homeSubtitle = "A duck, eating, gaming, coding"
+  homeSubtitle = "Programming languages, formal methods, and compiler correctness."
 
   # Set a background for the homepage
   # backgroundImage = "assets/images/background.jpg"
@@ -105,7 +105,7 @@ disableHugoGeneratorInject = false
   # If you want, you can easily override the default footer with your own content. 
   #
   [params.author]
-    name = "Eric Wang"
+    name = "Eric Chengyuan Wang"
 
   [params.footer]
     trademark = true

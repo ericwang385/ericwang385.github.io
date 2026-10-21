@@ -1,6 +1,6 @@
 // Style for profile photo on about page
 .post-content {
-  img[alt="Eric Wang"] {
+  img[alt="Eric Chengyuan Wang"] {
     float: left;
     margin-right: 30px;
     margin-bottom: 10px;
@@ -11,7 +11,7 @@
   }
   
   // Reduce spacing after image
-  img[alt="Eric Wang"] + h2 {
+  img[alt="Eric Chengyuan Wang"] + h2 {
     margin-top: 0;
   }
   
@@ -22,7 +22,7 @@
 }
 
 @media (max-width: 768px) {
-  .post-content img[alt="Eric Wang"] {
+  .post-content img[alt="Eric Chengyuan Wang"] {
     float: none;
     display: block;
     margin: 0 auto 20px;
